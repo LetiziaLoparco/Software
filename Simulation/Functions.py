@@ -123,5 +123,3 @@ def plot_Neel_structure_factor_different_t(reg, R_interatomic, correlation_funct
 
     Create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax = ax)
 
-def plot_different_neighbors(correlation_function, ax=None):
-    Create_figure_different_neighbors(correlation_function, ax = None)

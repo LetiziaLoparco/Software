@@ -36,9 +36,6 @@ class GUIHandler(QMainWindow):
         self.ui.Correlation_plot_button.clicked.connect(self.plot_correlation)
         self.ui.Neel_structure_plot_button.clicked.connect(self.initialize_parameters)
         self.ui.Neel_structure_plot_button.clicked.connect(self.show_neel_structure)
-        self.ui.Different_neighbors_plot_button.clicked.connect(self.initialize_parameters)
-        self.ui.Different_neighbors_plot_button.clicked.connect(self.show_different_neighbors)
-        self.ui.Clear_command.clicked.connect(self.clear_plot)
         self.ui.Show_next_command.clicked.connect(self.show_next_correlation_plot)
 
     def initialize_parameters(self):
@@ -53,8 +50,6 @@ class GUIHandler(QMainWindow):
         self.t_sweep_values = np.ceil(self.t_sweep_values / 4) * 4  # Ensure values are multiples of 4
         return self.U, self.Omega_max, self.delta_0, self.delta_f, self.t_rise, self.t_fall, self.t_sweep_values
     
-    def clear_plot(self):
-        self.figure.clear()
 
     def show_register_sequence(self): 
         """
@@ -97,19 +92,6 @@ class GUIHandler(QMainWindow):
         ax = self.figure.add_subplot(111)  # Add a subplot
         plot_Neel_structure_factor_different_t(reg, R_interatomic, results_correlation, ax=ax)    
         self.canvas.draw() 
-
-    def show_different_neighbors(self):
-        U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range =self.initialize_parameters()
-        reg, R_interatomic = prepare_register(U, N_SIDE)
-        results_correlation = run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range)
-
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)  # Add a subplot
-        plot_correlation_vs_t(results_correlation, N_SIDE, ax=ax)
-        self.canvas.draw() 
-
-
-        
 
 
 

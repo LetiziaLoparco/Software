@@ -83,6 +83,9 @@ You can configure the simulation parameters through the GUI interface. Some corr
   - Reset parameters or re-run simulations as needed.
 
 ---
+## Visualizing Correlation Functions and Néel Structure Factor
+
+---
 
 ## Technical Details
 
@@ -99,7 +102,6 @@ You can configure the simulation parameters through the GUI interface. Some corr
 ## Future Extensions
 
 - Add support for 3D quantum register visualizations.
-- Enable exporting simulation results as files.
 - Include additional interaction models.
 
 ---

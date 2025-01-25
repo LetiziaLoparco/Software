@@ -5,7 +5,7 @@ from Config import N_SIDE
 
 def occupation(j, N_qubits):
     """
-    Create the occupation operator for a single site in a quantum register.
+    Create the occupation operator |r><r| for each site j of the register, where the Rydberg state |r> represents the excited state.
 
     Parameters
     ----------
@@ -19,16 +19,16 @@ def occupation(j, N_qubits):
     qutip.Qobj
         Occupation operator for the specified site.
     """
-    up = qutip.basis(2, 0)
-    prod = [qutip.qeye(2) for _ in range(N_qubits)]
-    prod[j] = up * up.dag()
-    return qutip.tensor(prod)
+    up = qutip.basis(2, 0) # creates a basis vector in the 2-dimensional Hilbert space, state index=0 it means |r> in this case.
+    prod = [qutip.qeye(2) for _ in range(N_qubits)] # creates a list of 2x2 identity matrix (for N_qubits).
+    prod[j] = up * up.dag() #forms a projector operator for |r> at the state j.
+    return qutip.tensor(prod) # computes the tensor product of the list of operators.
 
 
 
 def get_corr_pairs(k, l, register, R_interatomic):
     """
-    Determine all pairs of qubits satisfying a specific distance condition.
+    Determine all couples (i,j) for a given (k,l).
 
     Parameters
     ----------
@@ -53,6 +53,8 @@ def get_corr_pairs(k, l, register, R_interatomic):
             distance = np.linalg.norm(r_ij - R_interatomic * np.array([k, l]))
             if distance < 1:
                 corr_pairs.append([i, j])
+
+
     return corr_pairs
 
 
@@ -82,6 +84,10 @@ def get_corr_function(k, l, reg, R_interatomic, final_state):
     #N_qubits = len(reg.qubits)
     N_qubits = N_SIDE * N_SIDE
     corr_pairs = get_corr_pairs(k, l, reg, R_interatomic)
+
+    # Handle the case where no pairs exist
+    if not corr_pairs:  
+        return 0
 
     operators = [occupation(j, N_qubits) for j in range(N_qubits)]
     covariance = 0
@@ -221,7 +227,7 @@ def get_neel_structure_factor(reg, R_interatomic, state):
 
 
 
-def Create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax=None):
+def create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax=None):
     """
     Plot the Néel structure factor as a function of total time.
 

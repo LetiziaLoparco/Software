@@ -156,5 +156,5 @@ def prepare_and_show_Neel_structure_factor(reg, R_interatomic, output_simulation
     neel_structure_factors = np.array(neel_structure_factors_list)
     t_tot = np.array(t_tot_list)
 
-    Create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax = ax)
+    create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax = ax)
 

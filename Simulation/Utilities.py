@@ -1,7 +1,7 @@
 import numpy as np
 import qutip
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+from Config import N_SIDE
 
 def occupation(j, N):
     """
@@ -112,7 +112,7 @@ def get_full_corr_function(reg, state, R_interatomic):
             correlation_function[(k, l)] = get_corr_function(k, l, reg, R_interatomic, state)
     return correlation_function
 
-def prepare_correlation_matrix(correlation_function, N_side):
+def prepare_correlation_matrix(correlation_function):
     """
     Prepare the correlation matrix for visualization.
 
@@ -129,11 +129,11 @@ def prepare_correlation_matrix(correlation_function, N_side):
         Normalized correlation matrix.
     """
     A = 4 * np.reshape(
-        list(correlation_function.values()), (2 * N_side - 1, 2 * N_side - 1)
+        list(correlation_function.values()), (2 * N_SIDE - 1, 2 * N_SIDE - 1)
     )
     return A / np.max(A)
 
-def Create_figure_correlation_matrix(A, t_tot, N_side, ax = None):
+def create_figure_correlation_matrix(A, t_tot, ax = None):
     """
     Plot the correlation matrix.
 
@@ -157,10 +157,10 @@ def Create_figure_correlation_matrix(A, t_tot, N_side, ax = None):
 
     cax = ax.imshow(A, cmap="coolwarm", vmin=-0.6, vmax=0.6)
     ax.set_xticks(range(len(A)))
-    ax.set_xticklabels([f"{x}" for x in range(-N_side + 1, N_side)])
+    ax.set_xticklabels([f"{x}" for x in range(-N_SIDE + 1, N_SIDE)])
     ax.set_xlabel(r"$\mathscr{k}$", fontsize=22)
     ax.set_yticks(range(len(A)))
-    ax.set_yticklabels([f"{-y}" for y in range(-N_side + 1, N_side)])
+    ax.set_yticklabels([f"{-y}" for y in range(-N_SIDE + 1, N_SIDE)])
     ax.set_ylabel(r"$\mathscr{l}$", rotation=0, fontsize=22, labelpad=10)
 
     # Add colorbar to the figure

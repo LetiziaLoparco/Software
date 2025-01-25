@@ -1,11 +1,9 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from pulser import Pulse, Sequence, Register
 from pulser_simulation import QutipEmulator
 from pulser.waveforms import RampWaveform
 from pulser.devices import AnalogDevice
 from Utilities import *
-#from Main import main_window
 from Config import *
 
 
@@ -14,9 +12,10 @@ def prepare_register(U):
     reg = Register.square(N_SIDE, R_interatomic, prefix="q")
     return reg, R_interatomic
 
+
 def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range):
    
-    results_correlation = []
+    output_simulations = []
 
     for t_sweep in t_sweep_range:
         t_tot = (t_sweep + t_rise + t_fall)*1e-3 # Convert to µs
@@ -37,15 +36,17 @@ def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fa
         seq.add(sweep, "ising")
         seq.add(fall, "ising")
         simul = QutipEmulator.from_sequence(seq, sampling_rate=0.02)
-        results = simul.run(progress_bar=True)
-        final_state = results.states[-1]
-        correlation_function = get_full_corr_function(reg, final_state, R_interatomic)
 
-        results_correlation.append((t_tot, results, correlation_function))
+        sim_results_states = simul.run(progress_bar=True)
+        sim_final_state = sim_results_states.states[-1]
+        correlation_value = get_full_corr_function(reg, sim_final_state, R_interatomic) 
 
-    return results_correlation
+        output_simulations.append((t_tot, sim_results_states, correlation_value)) 
 
-def plot_correlation_vs_t(results_correlation, ax=None):
+    return output_simulations
+
+
+def prepare_and_show_first_figure_correlation_matrix(output_simulations, ax=None): 
     """
     Plot the correlation function for varying time sweeps.
 
@@ -67,27 +68,13 @@ def plot_correlation_vs_t(results_correlation, ax=None):
     None
     """
     
-    for t_tot, _, correlation_function in results_correlation:
-        IMAGE_LIST.append((prepare_correlation_matrix(correlation_function, N_SIDE), t_tot))
+    for t_tot, _, correlation_value in output_simulations:
+        IMAGE_LIST.append((prepare_correlation_matrix(correlation_value), t_tot)) # lista di tuple
         
-    Create_figure_correlation_matrix(IMAGE_LIST[IMAGE_LIST_INDEX][0], IMAGE_LIST[IMAGE_LIST_INDEX][1], N_SIDE, ax = ax)
-    """global ax_2
-    ax_2 = ax"""
+    create_figure_correlation_matrix(IMAGE_LIST[IMAGE_LIST_INDEX][0], IMAGE_LIST[IMAGE_LIST_INDEX][1], ax = ax)
 
 
-"""def show_next_correlation_plot(ax=None):
-    global image_list_index 
-    global ax_2
-    
-    if image_list_index < len(image_list):
-        image_list_index += 1
-        print(image_list_index)
-        print(N_side)
-        print(ax_2)
-        Create_figure_correlation_matrix(image_list[image_list_index][0], image_list[image_list_index][1], N_side, ax = ax_2)"""
-
-
-def plot_Neel_structure_factor_different_t(reg, R_interatomic, correlation_function, ax=None):
+def prepare_and_show_Neel_structure_factor(reg, R_interatomic, output_simulations, ax=None):
 
     """
     Plot the Néel structure factor as a function of time sweep.
@@ -109,12 +96,13 @@ def plot_Neel_structure_factor_different_t(reg, R_interatomic, correlation_funct
     -------
     None
     """
-    neel_structure_factors = []
+    neel_structure_factors_list = []
     t_tot_list = []
 
-    for t_tot, results, _ in correlation_function:
-        neel_factor = get_neel_structure_factor(reg, R_interatomic, results.states[-1])
-        neel_structure_factors.append(neel_factor)
+    # Commento su cosa fa
+    for t_tot, sim_results_states, _ in output_simulations:
+        neel_factor = get_neel_structure_factor(reg, R_interatomic, sim_results_states.states[-1])
+        neel_structure_factors_list.append(neel_factor)
         t_tot_list.append(t_tot)
 
   

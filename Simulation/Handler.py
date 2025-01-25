@@ -26,6 +26,8 @@ class GUIHandler(QMainWindow):
         self.canvas = FigureCanvas(self.figure) 
         self.ui.Plot.addWidget(self.canvas)  
 
+
+
     def setup_connections(self):
         self.ui.Reg_seq_plot_button.clicked.connect(self.initialize_parameters)
         self.ui.Reg_seq_plot_button.clicked.connect(self.show_register_sequence)
@@ -34,6 +36,8 @@ class GUIHandler(QMainWindow):
         self.ui.Neel_structure_plot_button.clicked.connect(self.initialize_parameters)
         self.ui.Neel_structure_plot_button.clicked.connect(self.show_neel_structure)
         self.ui.Show_next_command.clicked.connect(self.show_next_correlation_plot)
+
+
 
     def initialize_parameters(self):
         # Parameters in rad/µs and ns
@@ -46,7 +50,8 @@ class GUIHandler(QMainWindow):
         self.t_sweep_values = np.arange(self.ui.t_sweep_value_1.value(), self.ui.t_sweep_value_2.value(), NUMBER_STEPS)
         self.t_sweep_values = np.ceil(self.t_sweep_values / 4) * 4  # Ensure values are multiples of 4
         return self.U, self.Omega_max, self.delta_0, self.delta_f, self.t_rise, self.t_fall, self.t_sweep_values
-    
+
+
 
     def show_register_sequence(self): 
         """
@@ -60,8 +65,8 @@ class GUIHandler(QMainWindow):
     
     def plot_correlation(self): 
         # Ti assicura un indice valido, percchè a ciclo finito show_next_correlation_plot() manda a un indice non valido/Managment of global variable
-        global IMAGE_LIST_INDEX 
-        IMAGE_LIST_INDEX = 0 
+        global IMAGE_MATRIX_LIST_INDEX 
+        IMAGE_MATRIX_LIST_INDEX = 0 
 
         # Simulation 
         U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range =self.initialize_parameters()
@@ -74,18 +79,19 @@ class GUIHandler(QMainWindow):
         prepare_and_show_first_figure_correlation_matrix(results_sim, ax=ax)  
         self.canvas.draw()  
 
+
+
     def show_next_correlation_plot(self):
-        global IMAGE_LIST_INDEX
-        IMAGE_LIST_INDEX += 1
+        global IMAGE_MATRIX_LIST_INDEX
+        IMAGE_MATRIX_LIST_INDEX += 1
         
         self.figure.clear()
         ax = self.figure.add_subplot(111)
-        if IMAGE_LIST_INDEX < len(IMAGE_LIST):
-            print(IMAGE_LIST_INDEX)
-            create_figure_correlation_matrix(IMAGE_LIST[IMAGE_LIST_INDEX][0], IMAGE_LIST[IMAGE_LIST_INDEX][1], ax = ax)
+        if IMAGE_MATRIX_LIST_INDEX < len(IMAGE_MATRIX_LIST):
+            create_figure_correlation_matrix(IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][0], IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][1], ax = ax)
             self.canvas.draw() 
         else:
-            IMAGE_LIST_INDEX = -1
+            IMAGE_MATRIX_LIST_INDEX = -1
             print("No more plots to show, if you want to see them again, press the button again")
             self.figure.clear()
             self.canvas.draw()

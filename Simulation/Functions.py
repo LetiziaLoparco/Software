@@ -7,13 +7,60 @@ from Utilities import *
 from Config import *
 
 
+
 def prepare_register(U):
+    """
+    Prepare a quantum register for a given interaction strength.
+
+    Parameters
+    ----------
+    U : float
+        Interaction strength used to calculate the Rydberg blockade radius.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - reg (Register): Quantum register with qubit positions.
+        - R_interatomic (float): Interatomic distance scaling factor.
+    """
     R_interatomic = AnalogDevice.rydberg_blockade_radius(U)
     reg = Register.square(N_SIDE, R_interatomic, prefix="q")
     return reg, R_interatomic
 
 
+
 def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range):
+    """
+    Run a quantum simulation for various time sweeps (hence total time) and calculate the correlation values.
+
+    Parameters
+    ----------
+    reg : Register
+        Quantum register containing qubit positions.
+    R_interatomic : float
+        Interatomic distance scaling factor.
+    Omega_max : float
+        Maximum Rabi frequency for the pulse.
+    delta_0 : float
+        Initial detuning of the pulse.
+    delta_f : float
+        Final detuning of the pulse.
+    t_rise : float
+        Rise time of the pulse.
+    t_fall : float
+        Fall time of the pulse.
+    t_sweep_range : list or array-like
+        Array of sweep times to simulate.
+
+    Returns
+    -------
+    list of tuple
+        A list where each tuple contains:
+        - t_tot (float): Total duration of the sweep in microseconds.
+        - sim_results_states (QutipEmulator.Result): Simulation results containing quantum states.
+        - correlation_value (dict): Calculated correlation function values.
+    """
    
     output_simulations = []
 
@@ -46,22 +93,20 @@ def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fa
     return output_simulations
 
 
+
 def prepare_and_show_first_figure_correlation_matrix(output_simulations, ax=None): 
     """
-    Plot the correlation function for varying time sweeps.
+    Prepare correlation matrix figure for for all different total time and display the first correlation matrix figure.
 
     Parameters
     ----------
-    correlation_function : dict
-        Dictionary of correlation function values.
-    t_sweep : float
-        Duration of the time sweep.
-    t_rise : float
-        Rise time of the pulse.
-    t_fall : float
-        Fall time of the pulse.
-    N_side : int
-        Number of sites per side in the lattice.
+    output_simulations : list of tuple
+        A list of simulation results containing:
+        - t_tot (float): Total duration of the sweep in microseconds.
+        - sim_results_states (QutipEmulator.Result): Simulation results.
+        - correlation_value (dict): Correlation function values.
+    ax : matplotlib.axes.Axes, optional
+        Axes on which to draw the plot. If None, a new plot is created.
 
     Returns
     -------
@@ -69,28 +114,30 @@ def prepare_and_show_first_figure_correlation_matrix(output_simulations, ax=None
     """
     
     for t_tot, _, correlation_value in output_simulations:
-        IMAGE_LIST.append((prepare_correlation_matrix(correlation_value), t_tot)) # lista di tuple
+        IMAGE_MATRIX_LIST.append((prepare_correlation_matrix(correlation_value), t_tot)) 
         
-    create_figure_correlation_matrix(IMAGE_LIST[IMAGE_LIST_INDEX][0], IMAGE_LIST[IMAGE_LIST_INDEX][1], ax = ax)
+    create_figure_correlation_matrix(IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][0], IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][1], ax = ax)
+
 
 
 def prepare_and_show_Neel_structure_factor(reg, R_interatomic, output_simulations, ax=None):
 
     """
-    Plot the Néel structure factor as a function of time sweep.
+    Prepare and display the Néel structure factor as a function of time sweep.
 
     Parameters
     ----------
-    results_final_state : list of tuple
-        Each tuple contains a time sweep value and the corresponding simulation results.
-    t_rise : float
-        Rise time of the pulse.
-    t_fall : float
-        Fall time of the pulse.
-    reg : object
+    reg : Register
         Quantum register containing qubit positions.
     R_interatomic : float
         Interatomic distance scaling factor.
+    output_simulations : list of tuple
+        A list of simulation results containing:
+        - t_tot (float): Total duration of the sweep in microseconds.
+        - sim_results_states (QutipEmulator.Result): Simulation results.
+        - correlation_value (dict): Correlation function values.
+    ax : matplotlib.axes.Axes, optional
+        Axes on which to draw the plot. If None, a new plot is created.
 
     Returns
     -------
@@ -106,7 +153,7 @@ def prepare_and_show_Neel_structure_factor(reg, R_interatomic, output_simulation
         t_tot_list.append(t_tot)
 
   
-    neel_structure_factors = np.array(neel_structure_factors)
+    neel_structure_factors = np.array(neel_structure_factors_list)
     t_tot = np.array(t_tot_list)
 
     Create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax = ax)

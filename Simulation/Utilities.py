@@ -3,7 +3,7 @@ import qutip
 import matplotlib.pyplot as plt
 from Config import N_SIDE
 
-def occupation(j, N):
+def occupation(j, N_qubits):
     """
     Create the occupation operator for a single site in a quantum register.
 
@@ -11,8 +11,8 @@ def occupation(j, N):
     ----------
     j : int
         Index of the site for which the occupation operator is created.
-    N : int
-        Size of the quantum register.
+    N_qubits : int
+        Number of qubits in the quantum register.
 
     Returns
     -------
@@ -20,9 +20,11 @@ def occupation(j, N):
         Occupation operator for the specified site.
     """
     up = qutip.basis(2, 0)
-    prod = [qutip.qeye(2) for _ in range(N)]
+    prod = [qutip.qeye(2) for _ in range(N_qubits)]
     prod[j] = up * up.dag()
     return qutip.tensor(prod)
+
+
 
 def get_corr_pairs(k, l, register, R_interatomic):
     """
@@ -53,9 +55,11 @@ def get_corr_pairs(k, l, register, R_interatomic):
                 corr_pairs.append([i, j])
     return corr_pairs
 
-def get_corr_function(k, l, reg, R_interatomic, state):
+
+
+def get_corr_function(k, l, reg, R_interatomic, final_state):
     """
-    Calculate the covariance of the correlation function for specific displacements.
+    Calculate the covariance in order to calculate the correlation function for specific displacements.
 
     Parameters
     ----------
@@ -67,25 +71,28 @@ def get_corr_function(k, l, reg, R_interatomic, state):
         Quantum register containing qubit positions.
     R_interatomic : float
         Interatomic distance scaling factor.
-    state : qutip.Qobj
-        Quantum state of the system.
+    final_state : qutip.Qobj
+        Final quantum state of the system.
 
     Returns
     -------
     float
-        Normalized covariance of the correlation function.
+        Correlation function for specific displacements.
     """
-    N_qubits = len(reg.qubits)
+    #N_qubits = len(reg.qubits)
+    N_qubits = N_SIDE * N_SIDE
     corr_pairs = get_corr_pairs(k, l, reg, R_interatomic)
 
     operators = [occupation(j, N_qubits) for j in range(N_qubits)]
     covariance = 0
     for qi, qj in corr_pairs:
-        covariance += qutip.expect(operators[qi] * operators[qj], state)
-        covariance -= qutip.expect(operators[qi], state) * qutip.expect(operators[qj], state)
+        covariance += qutip.expect(operators[qi] * operators[qj], final_state)
+        covariance -= qutip.expect(operators[qi], final_state) * qutip.expect(operators[qj], final_state)
     return covariance / len(corr_pairs)
 
-def get_full_corr_function(reg, state, R_interatomic):
+
+
+def get_full_corr_function(reg, final_state, R_interatomic):
     """
     Calculate the full correlation function for all displacement vectors.
 
@@ -93,8 +100,8 @@ def get_full_corr_function(reg, state, R_interatomic):
     ----------
     reg : object
         Quantum register containing qubit positions.
-    state : qutip.Qobj
-        Quantum state of the system.
+    final_state : qutip.Qobj
+        Final quantum state of the system.
     R_interatomic : float
         Interatomic distance scaling factor.
 
@@ -103,14 +110,17 @@ def get_full_corr_function(reg, state, R_interatomic):
     dict
         Full correlation function with displacement vectors as keys.
     """
-    N_qubits = len(reg.qubits)
-
     correlation_function = {}
-    N_side = int(np.sqrt(N_qubits))
-    for k in range(-N_side + 1, N_side):
-        for l in range(-N_side + 1, N_side):
-            correlation_function[(k, l)] = get_corr_function(k, l, reg, R_interatomic, state)
+    #N_qubits = len(reg.qubits)
+
+    #N_side = int(np.sqrt(N_qubits))
+    
+    for k in range(-N_SIDE + 1, N_SIDE):
+        for l in range(-N_SIDE + 1, N_SIDE):
+            correlation_function[(k, l)] = get_corr_function(k, l, reg, R_interatomic, final_state)
     return correlation_function
+
+
 
 def prepare_correlation_matrix(correlation_function):
     """
@@ -120,18 +130,18 @@ def prepare_correlation_matrix(correlation_function):
     ----------
     correlation_function : dict
         Dictionary of correlation function values.
-    N_side : int
-        Number of sites per side in the lattice.
 
     Returns
     -------
     np.ndarray
-        Normalized correlation matrix.
+        Normalized correlation matrix for visualization.
     """
     A = 4 * np.reshape(
         list(correlation_function.values()), (2 * N_SIDE - 1, 2 * N_SIDE - 1)
     )
     return A / np.max(A)
+
+
 
 def create_figure_correlation_matrix(A, t_tot, ax = None):
     """
@@ -143,15 +153,14 @@ def create_figure_correlation_matrix(A, t_tot, ax = None):
         Correlation matrix.
     t_tot : float
         Total time of the pulse sequence.
-    N_side : int
-        Number of sites per side in the lattice.
     ax : matplotlib.axes.Axes, optional
-        Axes object for embedding the plot (default: None).
+        Axes object for embedding the plot. If None, a new plot is created.
 
     Returns
     -------
     None
     """
+
     if ax is None:
         fig, ax = plt.subplots(figsize=(5, 5))  # Create a new figure and subplot if none is provided
 
@@ -175,6 +184,8 @@ def create_figure_correlation_matrix(A, t_tot, ax = None):
     if ax is None:
         plt.show()
 
+
+
 def get_neel_structure_factor(reg, R_interatomic, state):
     """
     Calculate the Néel structure factor for a quantum register.
@@ -186,19 +197,20 @@ def get_neel_structure_factor(reg, R_interatomic, state):
     R_interatomic : float
         Interatomic distance scaling factor.
     state : qutip.Qobj
-        Quantum state of the system.
+        Final quantum state of the system.
 
     Returns
     -------
     float
-        Néel structure factor.
+        Calculated Néel structure factor.
     """
-    N_qubits = len(reg.qubits)
-    N_side = int(np.sqrt(N_qubits))
+
+    #N_qubits = len(reg.qubits)
+    #N_side = int(np.sqrt(N_qubits))
 
     st_fac = 0
-    for k in range(-N_side + 1, N_side):
-        for l in range(-N_side + 1, N_side):
+    for k in range(-N_SIDE + 1, N_SIDE):
+        for l in range(-N_SIDE + 1, N_SIDE):
             kk = np.abs(k)
             ll = np.abs(l)
             if not (k == 0 and l == 0):
@@ -206,6 +218,8 @@ def get_neel_structure_factor(reg, R_interatomic, state):
                      (-1) ** (kk + ll) * get_corr_function(k, l, reg, R_interatomic, state)
                 )
     return 4 * st_fac
+
+
 
 def Create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax=None):
     """
@@ -218,7 +232,7 @@ def Create_figure_Neel_structure_factor(t_tot, neel_structure_factors, ax=None):
     neel_structure_factors : np.ndarray
         Néel structure factors corresponding to each time.
     ax : matplotlib.axes.Axes, optional
-        Axes object for embedding the plot (default: None).
+        Axes object for embedding the plot. If None, a new plot is created.
 
     Returns
     -------

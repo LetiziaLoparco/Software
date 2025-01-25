@@ -21,7 +21,7 @@ class GUIHandler(QMainWindow):
         self.ui.setupUi(self)
         self.setup_connections()
 
-        # Create a Matplotlib figure and canvas
+        # Set up Matplotlib figure and canvas for plotting
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure) 
         self.ui.Plot.addWidget(self.canvas)  
@@ -29,6 +29,9 @@ class GUIHandler(QMainWindow):
 
 
     def setup_connections(self):
+        """
+        Set up connections between UI buttons and their respective handler functions.
+        """
         self.ui.Reg_seq_plot_button.clicked.connect(self.initialize_parameters)
         self.ui.Reg_seq_plot_button.clicked.connect(self.show_register_sequence)
         self.ui.Correlation_plot_button.clicked.connect(self.initialize_parameters)
@@ -40,7 +43,19 @@ class GUIHandler(QMainWindow):
 
 
     def initialize_parameters(self):
-        # Parameters in rad/µs and ns
+        """
+        Retrieve user-defined parameters from the GUI inputs and initialize them.
+
+        Converts user inputs into physical units (e.g., radians/µs) and ensures time steps
+        are adjusted to be multiples of 4, as required by the simulation.
+
+        Returns
+        -------
+        tuple
+            Initialized parameters including interaction strength, pulse settings,
+            and time sweep values.
+        """
+
         self.U = self.ui.U_h_value.value() * 2 * np.pi
         self.Omega_max = self.ui.Omega_max_value.value() * 2 * np.pi
         self.delta_0 = self.ui.Delta_initial_value.value() * 2 * np.pi
@@ -55,7 +70,9 @@ class GUIHandler(QMainWindow):
 
     def show_register_sequence(self): 
         """
-        Display the register sequence plot in the GUI.
+        Display the quantum register sequence in the GUI.
+
+        Uses the `prepare_register` function to generate the register and draw its configuration.
         """
         U, _, _, _, _, _, _ = self.initialize_parameters()
         reg, _ = prepare_register(U)
@@ -64,9 +81,16 @@ class GUIHandler(QMainWindow):
 
     
     def plot_correlation(self): 
-        # Ti assicura un indice valido, percchè a ciclo finito show_next_correlation_plot() manda a un indice non valido/Managment of global variable
+        """
+        Plot the correlation function for the first time sweep and reset the index for navigating plots.
+
+        Retrieves simulation results, processes them, and displays the first correlation plot in the GUI.
+        """
         global IMAGE_MATRIX_LIST_INDEX 
         IMAGE_MATRIX_LIST_INDEX = 0 
+        # Ensures the index is valid by resetting it, as the show_next_correlation_plot() 
+        # function increments the index and may lead to an invalid value at the end of the cycle.
+        # This handles the global variable management for navigation between plots.
 
         # Simulation 
         U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range =self.initialize_parameters()
@@ -82,27 +106,42 @@ class GUIHandler(QMainWindow):
 
 
     def show_next_correlation_plot(self):
+        """
+        Navigate and display the next correlation plot.
+
+        If the index exceeds the available plots, reset the index and show a message.
+        """
         global IMAGE_MATRIX_LIST_INDEX
         IMAGE_MATRIX_LIST_INDEX += 1
         
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         if IMAGE_MATRIX_LIST_INDEX < len(IMAGE_MATRIX_LIST):
+
             create_figure_correlation_matrix(IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][0], IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][1], ax = ax)
             self.canvas.draw() 
         else:
+            # Reset the index if no more plots are available
             IMAGE_MATRIX_LIST_INDEX = -1
+
             print("No more plots to show, if you want to see them again, press the button again")
             self.figure.clear()
             self.canvas.draw()
 
 
-    # Commento
+    
     def show_neel_structure(self): 
+        """
+        Plot the Néel structure factor for the given time sweeps.
+
+        Runs the simulation, calculates the Néel structure factor, and displays it in the GUI.
+        """
+        # Simulation
         U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range =self.initialize_parameters()
         reg, R_interatomic = prepare_register(U)
         results_sim = run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range)
 
+        # Plot figure
         self.figure.clear()
         ax = self.figure.add_subplot(111)  
         prepare_and_show_Neel_structure_factor(reg, R_interatomic, results_sim, ax=ax)    

@@ -74,7 +74,8 @@ $$ H = \sum_i \left[ \frac{\hbar \Omega(t)}{2} \sigma_i^x - \hbar \delta(t)n_i \
 
 The parameters are dynamically tuned as follows:
 
-![Visualization of pulse sequence](images/Pulse_sequence.png)
+![Pulse_sequence](https://github.com/user-attachments/assets/4ce7d305-e77c-4545-aa4c-9bc6e5a4077c)
+
 
 ### Steps in Detail
 
@@ -89,7 +90,7 @@ Simulation parameters can be configured through the GUI. Default values are pre-
 
 #### 2. Quantum Register Preparation
 
-The register is set up as a square lattice of \( N_{\text{side}} \times N_{\text{side}} \) atoms, where \( N_{\text{side}} \) is defined in `Config.py` ( default: $$\( N_{\text{side}} = 3 \)$$ ).
+The register is set up as a square lattice of $$\( N_{\text{side}} \times N_{\text{side}} \)$$ atoms, where $$\( N_{\text{side}} \)$$ is defined in `Config.py` ( default: $$\( N_{\text{side}} = 3 \)$$ ).
 
 The interatomic distance (lattice spacing) is set equal to the Rydberg blockade radius, computed using Pulser’s `AnalogDevice.rydberg_blockade_radius(U)` function. The register is visualized using `reg.draw()`.
 

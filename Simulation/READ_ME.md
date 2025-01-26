@@ -81,15 +81,15 @@ The parameters are dynamically tuned as follows:
 #### 1. Parameters Initialization
 
 Simulation parameters can be configured through the GUI. Default values are pre-set. Key parameters include:
-- Interaction strength \( U \)
-- Maximum Rabi frequency \( \Omega \)
-- Initial and final detuning \( \Delta \)
+- Interaction strength $$\( U \)$$
+- Maximum Rabi frequency $$\( \Omega \)$$
+- Initial and final detuning $$\( \Delta \)$$
 - Rise and fall times
 - Time sweep ranges (number of steps is pre-set to 100 in `Config.py`).
 
 #### 2. Quantum Register Preparation
 
-The register is set up as a square lattice of \( N_{\text{side}} \times N_{\text{side}} \) atoms, where \( N_{\text{side}} \) is defined in `Config.py` (default: \( N_{\text{side}} = 3 \)).
+The register is set up as a square lattice of \( N_{\text{side}} \times N_{\text{side}} \) atoms, where \( N_{\text{side}} \) is defined in `Config.py` ( default: $$\( N_{\text{side}} = 3 \)$$ ).
 
 The interatomic distance (lattice spacing) is set equal to the Rydberg blockade radius, computed using Pulser’s `AnalogDevice.rydberg_blockade_radius(U)` function. The register is visualized using `reg.draw()`.
 
@@ -99,9 +99,9 @@ The correlation function measures the quality of the resulting state after the s
 
 $$ g^{(2)}(k, l) = \frac{1}{N_{k, l}} \sum_{i, j} \left( \langle n_i n_j \rangle - \langle n_i \rangle \langle n_j \rangle \right) $$
 
-This function evaluates the correlation between local operators \( n_i \) and \( n_j \) at different positions, averaged over all pairs of atoms separated by vector \( (ka, la) \).
+This function evaluates the correlation between local operators $$\( n_i \)$$ and $$\( n_j \)$$ at different positions, averaged over all pairs of atoms separated by vector $$\( (ka, la) \)$$.
 
-Pressing the **"2D Antiferromagnet"** button initiates a new simulation with a laser applied globally following the pulse sequence for different \( t_{\text{sweep}} \) values. The correlation matrix is plotted for different time values and displayed using the **"Show Next"** button. Stronger correlations are indicated by more vivid colors.
+Pressing the **"2D Antiferromagnet"** button initiates a new simulation with a laser applied globally following the pulse sequence for different $$\( t_{\text{sweep}} \)$$ values. The correlation matrix is plotted for different time values and displayed using the **"Show Next"** button. Stronger correlations are indicated by more vivid colors.
 
 #### 4. Néel Structure Factor
 

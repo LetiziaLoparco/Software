@@ -1,6 +1,6 @@
 # Quantum Simulation GUI for Register and Correlation Analysis
 
-This software provides a graphical user interface (GUI) to simulate quantum registers and analyze their correlation and Néel structure factors. Users can configure simulation parameters, visualize quantum register setups, plot correlation matrices, and compute the Néel structure factor using the GUI.
+This software offers an intuitive graphical user interface (GUI) for simulating quantum registers and analyzing their correlation and Néel structure factors. Built with Qt Designer, the application enables users to configure simulation parameters, visualize quantum register arrangements, plot correlation matrices, and compute the Néel structure factor efficiently.
 
 ---
 
@@ -8,7 +8,6 @@ This software provides a graphical user interface (GUI) to simulate quantum regi
 
 1. **Quantum Register Visualization**:
    - Set up and visualize a quantum register for a given interaction strength.
-   - Customize parameters for the register size and spacing.
 
 2. **Correlation Matrix Plotting**:
    - Simulate quantum states and compute correlation matrices.
@@ -64,7 +63,7 @@ This software provides a graphical user interface (GUI) to simulate quantum regi
 
 This code and theory summary are based on the Quantum Computing course by Prof. Calarco, Prof. Ercolessi, and Prof. Bonacorsi at the University of Bologna. The code is inspired by a model experimentally implemented with a Rydberg-atom platform ([DOI: 10.1103/PhysRevX.8.021070]). It leverages Pulser, an open-source Python library for programming neutral atom devices at the pulse level ([arXiv:2104.15044v3]).
 
-We aim to study a quantum many-body system, dynamically tuning the parameters to observe the buildup of antiferromagnetic order. The simulation emulates an Ising quantum antiferromagnet on a square lattice, exploring the ground-state phase diagrams for the nearest-neighbor Ising model.
+We aim to study a quantum many-body system, dynamically tuning the parameters to observe the buildup of antiferromagnetic order. The simulation emulates an Ising quantum antiferromagnet on a square lattice (pre-set to $$N_{side}=3$$ in `Config.py`), exploring the ground-state phase diagrams for the nearest-neighbor Ising model.
 
 The GUI enables the observation of the influence of finite ramp speed on the extent of correlations, depending on the chosen parameters. The development of correlations during the ramp is visualized in both space and time.
 
@@ -87,6 +86,15 @@ Simulation parameters can be configured through the GUI. Default values are pre-
 - Initial and final detuning $$\( \Delta \)$$
 - Rise and fall times
 - Time sweep ranges (number of steps is pre-set to 100 in `Config.py`).
+
+##### Note:
+All limitations on pulse parameters can be found by printing the specifications from the Pulser library. Use the following command:
+
+```python
+from pulser.devices import AnalogDevice
+AnalogDevice.print_specs()
+```
+
 
 #### 2. Quantum Register Preparation
 

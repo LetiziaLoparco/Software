@@ -97,7 +97,7 @@ The interatomic distance (lattice spacing) is set equal to the Rydberg blockade 
 
 The correlation function measures the quality of the resulting state after the simulation:
 
-\[ g^{(2)}(k, l) = \frac{1}{N_{k, l}} \sum_{i, j} \left( \langle n_i n_j \rangle - \langle n_i \rangle \langle n_j \rangle \right) \]
+$$ g^{(2)}(k, l) = \frac{1}{N_{k, l}} \sum_{i, j} \left( \langle n_i n_j \rangle - \langle n_i \rangle \langle n_j \rangle \right) $$
 
 This function evaluates the correlation between local operators \( n_i \) and \( n_j \) at different positions, averaged over all pairs of atoms separated by vector \( (ka, la) \).
 
@@ -107,7 +107,7 @@ Pressing the **"2D Antiferromagnet"** button initiates a new simulation with a l
 
 To understand the behavior further, the Néel structure factor is computed to detect antiferromagnetic correlations in the AF region of the phase diagram:
 
-\[ S_{\text{Néel}} = 4 \sum_{(k, l) \neq (0, 0)} (-1)^{|k|+|l|} g^{(2)}(k, l) \]
+$$ S_{\text{Néel}} = 4 \sum_{(k, l) \neq (0, 0)} (-1)^{|k|+|l|} g^{(2)}(k, l) $$
 
 In the AF region of the phase diagram, stronger correlations yield higher values of \( S_{\text{Néel}} \).
 

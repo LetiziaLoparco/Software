@@ -89,7 +89,7 @@ Simulation parameters can be configured through the GUI. Default values are pre-
 
 #### 2. Quantum Register Preparation
 
-The register is set up as a square lattice of \( N_{\text{side}} \times N_{\text{side}} \) atoms, where \( N_{\text{side}} \) is defined in `Config.py` ( default: $$\( N_{\text{side}} = 3 \)$$ ).
+The register is set up as a square lattice of $$\( N_{\text{side}} \times N_{\text{side}} \)$$ atoms, where $$\( N_{\text{side}} \)$$ is defined in `Config.py` ( default: $$\( N_{\text{side}} = 3 \)$$ ).
 
 The interatomic distance (lattice spacing) is set equal to the Rydberg blockade radius, computed using Pulser’s `AnalogDevice.rydberg_blockade_radius(U)` function. The register is visualized using `reg.draw()`.
 

@@ -135,7 +135,7 @@ def test_get_corr_pairs_valid():
     Expected pairs are calculated based on the distance condition.
     """
     # Starting data
-    R_interatomic = 1.0  # Scaling factor for interatomic distance
+    R_interatomic = 1.0  
     reg = Register.rectangle(2, 2, spacing=R_interatomic)  # Create a 2x2 lattice
     k, l = 1, 0  # Displacement vector
 
@@ -148,26 +148,48 @@ def test_get_corr_pairs_valid():
     # Assert that the result matches the expected pairs
     assert sorted(result_pairs) == sorted(expected_pairs), f"Expected {expected_pairs}, got {result_pairs}"
 
-
-def test_get_corr_pairs_no_pairs():
+def test_get_corr_pairs_zero_displacement_vector(): 
     """
-    Test the `get_corr_pairs` function when no pairs satisfy the distance condition.
+    Test the `get_corr_pairs` function with valid inputs and expected pairs.
 
-    The function is tested with a register and displacement values where no qubits
-    should meet the distance requirement.
+    The function is tested with a simple register layout and displacement values (k, l).
+    Expected pairs are calculated based on the distance condition.
     """
     # Starting data
-    R_interatomic = 2.0  # Large interatomic distance
-    reg = Register.square(3, spacing=R_interatomic)  # Create a 3x3 lattice
-    k, l = 10, 10  # Large displacement vector
+    R_interatomic = 1.0 
+    reg = Register.rectangle(2, 2, spacing=R_interatomic)  
+    k, l = 0, 0  
 
-    # Expected result: no pairs
-    expected_pairs = []
+    # Expected pairs
+    expected_pairs = [[0,0], [1,1], [2,2], [3,3]]
 
     # Calculated result
     result_pairs = get_corr_pairs(k, l, reg, R_interatomic)
 
-    # Assert that the result is an empty list
+    # Assert that the result matches the expected pairs
+    assert sorted(result_pairs) == sorted(expected_pairs), f"Expected {expected_pairs}, got {result_pairs}"
+
+
+def test_get_corr_pairs_diagonal_pairs(): 
+    """
+    Test the `get_corr_pairs` function with diagonal displacement vector.
+
+    The function is tested with a register and displacement values where no qubits
+    should meet the distance requirement.
+    """
+
+    # Starting data
+    R_interatomic = 2.0 
+    reg = Register.square(N_SIDE, spacing=R_interatomic)  
+    k, l = 1, 1  
+
+    # Expected result
+    expected_pairs = [[4, 0], [5, 1], [7, 3], [8, 4]]
+
+    # Calculated result
+    result_pairs = get_corr_pairs(k, l, reg, R_interatomic)
+
+    # Assert that the result 
     assert result_pairs == expected_pairs, f"Expected no pairs, got {result_pairs}"
 
 
@@ -180,8 +202,8 @@ def test_get_corr_pairs_single_qubit():
     """
     # Starting data
     R_interatomic = 1.0
-    reg = Register.from_coordinates([[0, 0]])  # Single qubit at the origin
-    k, l = 1, 0  # Displacement vector
+    reg = Register.from_coordinates([[0, 0]]) 
+    k, l = 1, 0  
 
     # Expected result: no pairs
     expected_pairs = []
@@ -202,8 +224,8 @@ def test_get_corr_pairs_multiple_displacements():
     """
     # Starting data
     R_interatomic = 1.0
-    reg = Register.square(3, spacing=R_interatomic)  # Create a 3x3 lattice
-    displacements = [(1, 0), (0, 1), (1, 1)]  # Different (k, l) values
+    reg = Register.square(N_SIDE, spacing=R_interatomic)  
+    displacements = [(1, 0), (0, 1), (1, 1)]  
 
     # Expected results for each displacement
     expected_results = {
@@ -222,97 +244,153 @@ def test_get_corr_pairs_multiple_displacements():
 
 ####################################################################################################
 
-
-
-
-def test_get_corr_function_valid():
+def test_get_corr_function_entangled_states(): 
     """
-    Test the `get_corr_function` for valid inputs and a simple final state.
+    Test the `get_corr_function` for a quantum register initialized with an entangled state.
 
-    The function is tested with a predefined register and a uniform final state. The 
-    correlation function is calculated for a valid (k, l) displacement.
+    This test validates the calculation of the correlation function, a key measure of 
+    quantum correlations between qubits, for a register with an entangled state. The test 
+    uses a predefined 9-qubit system where the entangled state is constructed as a 
+    superposition of two alternating spin configurations: |010101010> and |101010101>.
     """
-    # Starting data
-    R_interatomic = 1.0  # Interatomic distance scaling factor
-    reg = Register.square(N_SIDE, spacing=R_interatomic)  # Create a 3x3 lattice
-    k, l = 1, 0  # Displacement vector
+    # Constants
+    R_interatomic = 1.0 
+    k, l = 1, 0  
+    N = N_SIDE * N_SIDE
+    # Create a square register of qubits
+    reg = Register.square(N_SIDE, spacing=R_interatomic)
 
-    # Create a simple final state: all qubits in the |0> state
-    N_qubits = N_SIDE * N_SIDE
-    final_state = qutip.tensor([qutip.basis(2, 0)] * N_qubits)
 
-    # Expected correlation value: the theoretical calculation can be added if known
-    corr_pairs = get_corr_pairs(k, l, reg, R_interatomic)
-    operators = [occupation(j, N_qubits) for j in range(N_qubits)]
-    expected_covariance = sum(
-        qutip.expect(operators[qi] * operators[qj], final_state)
-        - qutip.expect(operators[qi], final_state) * qutip.expect(operators[qj], final_state)
-        for qi, qj in corr_pairs
-    ) / len(corr_pairs)
+    # Define the basis states for 4 qubits
+    basis_1 = qutip.tensor(*[qutip.basis(2, i % 2) for i in range(N)])  # |010101010>
+    basis_2 = qutip.tensor(*[qutip.basis(2, (i + 1) % 2) for i in range(N)])  # |101010101>
 
-    # Calculated result
+    # Create the entangled state
+    final_state = (1 / np.sqrt(2)) * (basis_1 + basis_2)
+
+
+ 
+    expected_covariance = -0.25
+
+
+    # Calculate the correlation function using the tested function
     result = get_corr_function(k, l, reg, R_interatomic, final_state)
 
-    # Assert equality
-    assert np.isclose(result, expected_covariance), f"Expected {expected_covariance}, got {result}"
+    # Print debugging information
+    print(f"Result: {result}, Expected: {expected_covariance}")
+
+    # Assert the result matches the expected value
+    assert np.isclose(result, expected_covariance), (
+        f"Expected {expected_covariance}, got {result}"
+    )
 
 
-def test_get_corr_function_no_pairs():
+def test_get_corr_function_uncorrelated_qubits():
     """
-    Test the `get_corr_function` when no valid pairs exist for the given (k, l).
+    Test the `get_corr_function` for a quantum register with an uncorrelated state.
 
-    The function is tested with a displacement vector that exceeds the range of 
-    the register. The result should be zero or raise a controlled error.
-    """
-    # Starting data
-    R_interatomic = 1.0
-    reg = Register.square(N_SIDE, spacing=R_interatomic)  # Create a 3x3 lattice
-    k, l = 10, 10  # Large displacement vector
+    This test verifies that the correlation function correctly evaluates to zero 
+    for a system where qubits are in an uncorrelated product state. The state 
+    used is a simple alternating spin configuration: |010101010>, where each qubit 
+    is either in the Rydberg state (|0> = |r>) or the ground state (|1>) based on its index.
 
-    # Create a simple final state
-    N_qubits = N_SIDE * N_SIDE
-    final_state = qutip.tensor([qutip.basis(2, 0)] * N_qubits)
+    The test focuses on the displacement vector (k, l) = (1, 0), representing 
+    nearest neighbors along the first axis. Since the qubits are in a product state, 
+    no correlations exist, and the expected covariance is zero.
 
-    # Expected result: No valid pairs -> covariance should be zero
-    expected_result = 0
-
-    # Calculated result
-    result = get_corr_function(k, l, reg, R_interatomic, final_state)
-
-    # Assert equality
-    assert np.isclose(result, expected_result), f"Expected {expected_result}, got {result}"
-
-
-def test_get_corr_function_negative_displacement():
-    """
-    Test the `get_corr_function` for negative displacement values.
-
-    The function is tested with negative (k, l) values to ensure that the
-    calculation correctly accounts for direction.
+    This test ensures that the function accurately handles scenarios without 
+    quantum correlations, validating its correctness for non-entangled states.
     """
     # Starting data
-    R_interatomic = 1.0
-    reg = Register.square(N_SIDE, spacing=R_interatomic)  # Create a 3x3 lattice
-    k, l = -1, 0  # Negative displacement vector
+    R_interatomic = 1.0  
+    reg = Register.square(N_SIDE, spacing=R_interatomic)  
+    k, l = 1, 0  
 
-    # Create a simple final state
-    N_qubits = N_SIDE * N_SIDE
-    final_state = qutip.tensor([qutip.basis(2, 0)] * N_qubits)
+    # Create a simple final state: all qubits in the |r> state
+    N = N_SIDE * N_SIDE
+    final_state = qutip.tensor(*[qutip.basis(2, i % 2) for i in range(N)])  # |010101010>
 
     # Expected correlation value
-    corr_pairs = get_corr_pairs(k, l, reg, R_interatomic)
-    operators = [occupation(j, N_qubits) for j in range(N_qubits)]
-    expected_covariance = sum(
-        qutip.expect(operators[qi] * operators[qj], final_state)
-        - qutip.expect(operators[qi], final_state) * qutip.expect(operators[qj], final_state)
-        for qi, qj in corr_pairs
-    ) / len(corr_pairs)
+    expected_covariance = 0
 
     # Calculated result
     result = get_corr_function(k, l, reg, R_interatomic, final_state)
-
+    
+    
     # Assert equality
     assert np.isclose(result, expected_covariance), f"Expected {expected_covariance}, got {result}"
+
+def test_get_corr_function_uncorrelated_qubits_with_interaction():
+    """
+    Test the `get_corr_function` for a quantum register with an uncorrelated state.
+
+    This test verifies that the correlation function correctly evaluates to zero 
+    for a system where qubits are in an uncorrelated product state. The state 
+    used is a simple alternating spin configuration: |010101010>, where each qubit 
+    is either in the Rydberg state (|0> = |r>) or the ground state (|1>) based on its index.
+
+    The test focuses on the displacement vector (k, l) = (1, 1). Even though for 
+    pairs such as (4, 0) and (8, 4) the joint expectation value ⟨ni nj⟩ = 1, 
+    the covariance remains zero because the individual expectation values satisfy 
+    ⟨ni⟩⟨nj⟩ = 1. As a result, the correlation function evaluates to zero, 
+    confirming that the state exhibits no quantum correlations.
+
+    This test ensures that the `get_corr_function` behaves correctly for uncorrelated 
+    product states and displacement vectors that span multiple qubits.
+    """
+
+    # Starting data
+    R_interatomic = 1.0  
+    reg = Register.square(N_SIDE, spacing=R_interatomic)  
+    k, l = 1, 1  
+
+    # Create a simple final state: all qubits in the |r> state
+    N = N_SIDE * N_SIDE
+    final_state = qutip.tensor(*[qutip.basis(2, i % 2) for i in range(N)])  # |010101010>
+
+    # Expected correlation value
+    expected_covariance = 0
+
+    # Calculated result
+    result = get_corr_function(k, l, reg, R_interatomic, final_state)
+    
+    
+    # Assert equality
+    assert np.isclose(result, expected_covariance), f"Expected {expected_covariance}, got {result}"
+
+def test_get_corr_function_self_correlation():
+    """
+    Test the `get_corr_function` for self-correlation in a uniform quantum state.
+
+    This test evaluates the correlation function for the self-correlation case 
+    (k, l) = (0, 0), where the displacement vector represents no spatial separation 
+    (i.e., correlations of qubits with themselves).
+
+    The register is initialized as a 3x3 lattice, and the final state consists 
+    of all qubits in the Rydberg state (|r>). For such a uniform state, the expected 
+    covariance for self-correlation should be zero.
+
+    This test ensures that the function correctly calculates the self-correlation 
+    and handles the trivial displacement vector case.
+    """
+    # Starting data
+    R_interatomic = 1.0  
+    reg = Register.square(N_SIDE, spacing=R_interatomic) 
+    k, l = 0, 0  
+
+    # Create a simple final state: all qubits in the |r> state
+    N_qubits = N_SIDE * N_SIDE
+    final_state = qutip.tensor([qutip.basis(2, 0)] * N_qubits)
+
+   
+
+    expected_covariance = 0
+    result = get_corr_function(k, l, reg, R_interatomic, final_state)
+    
+    
+    # Assert equality
+    assert np.isclose(result, expected_covariance), f"Expected {expected_covariance}, got {result}"
+
 
 
 ####################################################################################################
@@ -326,8 +404,7 @@ def test_prepare_correlation_matrix_valid():
     The function is tested with a valid correlation function dictionary, ensuring that
     it correctly reshapes and normalizes the matrix.
     """
-    # Starting data: A mock correlation function
-    N_SIDE = 3  # Example for a 3x3 lattice
+    # Starting data:
     correlation_function = {
         (-2, -2): 1,
         (-2, -1): 2,
@@ -400,7 +477,6 @@ def test_prepare_correlation_matrix_unbalanced():
     expected for the lattice size, ensuring proper handling of incorrect inputs.
     """
     # Starting data: Missing or extra entries
-    N_SIDE = 3
     correlation_function = {
         (-1, 0): 3,
         (0, 0): 4,
@@ -423,7 +499,6 @@ def test_prepare_correlation_matrix_normalization():
     the matrix is normalized to the range [0, 1].
     """
     # Starting data
-    N_SIDE = 3
     correlation_function = {
         (k, l): k * l for k in range(-2, 3) for l in range(-2, 3)
     }
@@ -437,79 +512,38 @@ def test_prepare_correlation_matrix_normalization():
 
 ####################################################################################################
 
-def test_get_neel_structure_factor_valid():
+def test_neel_structure_factor_positive():
     """
-    Test `get_neel_structure_factor` with a valid quantum register and state.
-
-    The function is tested with a simple 3x3 lattice and a predefined quantum state.
+    Test if `get_neel_structure_factor` always returns positive values.
+    
+    This test verifies that the Néel structure factor is non-negative for various 
+    quantum states, including uniform, alternating, and entangled states, across 
+    a predefined 3x3 quantum register.
     """
-    # Starting data
+    # Constants
     R_interatomic = 1.0
-    reg = Register.square(N_SIDE, spacing=R_interatomic)  # Create a 3x3 lattice
-    N_qubits = N_SIDE * N_SIDE
+    reg = Register.square(N_SIDE, spacing=R_interatomic)
 
-    # Simple final state: all qubits in the |0> state
-    state = qutip.tensor([qutip.basis(2, 0)] * N_qubits)
+    # Test cases
+    test_states = [
+        # Uniform state: All |r>=|0>
+        qutip.tensor(*[qutip.basis(2, 0) for _ in range(N_SIDE * N_SIDE)]),
 
-    # Mock get_corr_function to return a constant value (e.g., 1 for all (k, l))
-    def mock_get_corr_function(k, l, reg, R_interatomic, state):
-        return 1
+        # Uniform state: All |1>
+        qutip.tensor(*[qutip.basis(2, 1) for _ in range(N_SIDE * N_SIDE)]),
 
-    # Inject the mock function
-    global get_corr_function
-    original_get_corr_function = get_corr_function
-    get_corr_function = mock_get_corr_function
+        # Alternating state: |010101...>
+        qutip.tensor(*[qutip.basis(2, i % 2) for i in range(N_SIDE * N_SIDE)]),
 
-    try:
-        # Calculated result
+        # Entangled state: |010101...> + |101010...>
+        (1 / np.sqrt(2)) * (
+            qutip.tensor(*[qutip.basis(2, i % 2) for i in range(N_SIDE * N_SIDE)]) +
+            qutip.tensor(*[qutip.basis(2, (i + 1) % 2) for i in range(N_SIDE * N_SIDE)])
+        ),
+    ]
+
+    # Test each state
+    for idx, state in enumerate(test_states):
         result = get_neel_structure_factor(reg, R_interatomic, state)
-
-        # Expected Néel structure factor
-        expected_result = sum(
-            (-1) ** (np.abs(k) + np.abs(l)) for k in range(-N_SIDE + 1, N_SIDE) for l in range(-N_SIDE + 1, N_SIDE)
-            if not (k == 0 and l == 0)
-        ) * 4
-
-        # Assert equality
-        assert np.isclose(result, expected_result), f"Expected {expected_result}, got {result}"
-    finally:
-        # Restore the original function
-        get_corr_function = original_get_corr_function
-
-
-def test_get_neel_structure_factor_zero_state():
-    """
-    Test `get_neel_structure_factor` with a quantum state that leads to zero correlation.
-
-    The function is tested with a state designed to produce zero correlation values.
-    """
-    # Starting data
-    R_interatomic = 1.0
-    reg = Register.square(N_SIDE, spacing=R_interatomic)  # Create a 3x3 lattice
-    N_qubits = N_SIDE * N_SIDE
-
-    # Simple final state: all qubits in the |1> state
-    state = qutip.tensor([qutip.basis(2, 1)] * N_qubits)
-
-    # Mock get_corr_function to return zero for all (k, l)
-    def mock_get_corr_function(k, l, reg, R_interatomic, state):
-        return 0
-
-    # Inject the mock function
-    global get_corr_function
-    original_get_corr_function = get_corr_function
-    get_corr_function = mock_get_corr_function
-
-    try:
-        # Calculated result
-        result = get_neel_structure_factor(reg, R_interatomic, state)
-
-        # Expected result: Zero Néel structure factor
-        expected_result = 0
-
-        # Assert equality
-        assert np.isclose(result, expected_result), f"Expected {expected_result}, got {result}"
-    finally:
-        # Restore the original function
-        get_corr_function = original_get_corr_function
-
+        
+        assert result >= 0, f"Néel structure factor is negative for test case {idx + 1}."

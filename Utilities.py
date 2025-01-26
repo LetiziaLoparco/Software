@@ -51,7 +51,7 @@ def get_corr_pairs(k, l, register, R_interatomic):
         for j, qj in enumerate(register.qubits):
             r_ij = register.qubits[qi] - register.qubits[qj]
             distance = np.linalg.norm(r_ij - R_interatomic * np.array([k, l]))
-            if distance < 1:
+            if distance < 1 :
                 corr_pairs.append([i, j])
 
 
@@ -81,7 +81,7 @@ def get_corr_function(k, l, reg, R_interatomic, final_state):
     float
         Correlation function for specific displacements.
     """
-    #N_qubits = len(reg.qubits)
+    
     N_qubits = N_SIDE * N_SIDE
     corr_pairs = get_corr_pairs(k, l, reg, R_interatomic)
 
@@ -94,6 +94,7 @@ def get_corr_function(k, l, reg, R_interatomic, final_state):
     for qi, qj in corr_pairs:
         covariance += qutip.expect(operators[qi] * operators[qj], final_state)
         covariance -= qutip.expect(operators[qi], final_state) * qutip.expect(operators[qj], final_state)
+
     return covariance / len(corr_pairs)
 
 
@@ -117,9 +118,6 @@ def get_full_corr_function(reg, final_state, R_interatomic):
         Full correlation function with displacement vectors as keys.
     """
     correlation_function = {}
-    #N_qubits = len(reg.qubits)
-
-    #N_side = int(np.sqrt(N_qubits))
     
     for k in range(-N_SIDE + 1, N_SIDE):
         for l in range(-N_SIDE + 1, N_SIDE):
@@ -210,9 +208,6 @@ def get_neel_structure_factor(reg, R_interatomic, state):
     float
         Calculated Néel structure factor.
     """
-
-    #N_qubits = len(reg.qubits)
-    #N_side = int(np.sqrt(N_qubits))
 
     st_fac = 0
     for k in range(-N_SIDE + 1, N_SIDE):

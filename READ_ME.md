@@ -109,7 +109,7 @@ To understand the behavior further, the Néel structure factor is computed to de
 
 $$ S_{\text{Néel}} = 4 \sum_{(k, l) \neq (0, 0)} (-1)^{|k|+|l|} g^{(2)}(k, l) $$
 
-In the AF region of the phase diagram, stronger correlations yield higher values of \( S_{\text{Néel}} \).
+In the AF region of the phase diagram, stronger correlations yield higher values of $$\( S_{\text{Néel}} \)$$.
 
 ---
 

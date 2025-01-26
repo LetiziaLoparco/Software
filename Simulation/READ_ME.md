@@ -70,7 +70,7 @@ The GUI enables the observation of the influence of finite ramp speed on the ext
 
 The system is prepared in a product state with all atoms in the ground state. The Hamiltonian governing its evolution is:
 
-\[ H = \sum_i \left[ \frac{\hbar \Omega(t)}{2} \sigma_i^x - \hbar \delta(t)n_i \right] + \frac{1}{2} \sum_{i \neq j} U_{ij} n_i n_j \]
+$$ H = \sum_i \left[ \frac{\hbar \Omega(t)}{2} \sigma_i^x - \hbar \delta(t)n_i \right] + \frac{1}{2} \sum_{i \neq j} U_{ij} n_i n_j $$
 
 The parameters are dynamically tuned as follows:
 

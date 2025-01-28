@@ -110,7 +110,7 @@ $$ g^{(2)}(k, l) = \frac{1}{N_{k, l}} \sum_{i, j} \left( \langle n_i n_j \rangle
 
 This function evaluates the correlation between local operators $$\( n_i \)$$ and $$\( n_j \)$$ at different positions, averaged over all pairs of atoms separated by vector $$\( (ka, la) \)$$.
 
-Pressing the **"2D Antiferromagnet"** button initiates a new simulation with a laser applied globally following the pulse sequence for different $$\( t_{\text{sweep}} \)$$ values. The correlation matrix is plotted for different time values and displayed using the **"Show Next"** button. Stronger correlations are indicated by more vivid colors.
+Pressing the **"Show 2D antiferromagnetic correlation"** button initiates a new simulation with a laser applied globally following the pulse sequence for different $$\( t_{\text{sweep}} \)$$ values. The correlation matrix is plotted for different time values and displayed using the **"Show Next"** button. Stronger correlations are indicated by more vivid colors.
 
 #### 4. Néel Structure Factor
 
@@ -124,14 +124,21 @@ In the AF region of the phase diagram, stronger correlations yield higher values
 
 ## How to Navigate the Software
 
-- **Main Features**:
-  - Visualize the quantum register by clicking the **"Register Sequence"** button.
-  - Plot the correlation matrix for the first time sweep using the **"Correlation Plot"** button.
-  - Compute and display the Néel structure factor with the **"Néel Structure Plot"** button.
+The software provides a user-friendly interface to visualize and analyze quantum systems. Follow these instructions to utilize its features effectively:
 
-- **Additional Options**:
-  - Use the **"Next"** button to navigate through time-sweep plots.
-  - Reset parameters or re-run simulations as needed.
+### Main Features
+- **Visualize the Quantum Register**: Click the **"Show Register"** button to view the quantum register configuration.
+- **Correlation Plot**: Generate and display the correlation matrix for the first time sweep by pressing the **"Show 2d antiferromagnetic correlation"** button.
+- **Néel Structure Plot**: Compute and display the Néel structure factor by selecting the **"Show Néel Structure factor depending on t"** button.
+
+### Additional Options
+- **Navigate Time-Sweep Plots**: Use the **"Show next"** button to cycle through time-sweep plots.
+- **Reset and Re-run**: Modify parameters or restart simulations using the reset option.
+
+### Example GUI Interface
+Below is an example screenshot showing the GUI after generating the antiferromagnetic correlation plot by clicking the corresponding button.
+
+![GUInterface](https://github.com/user-attachments/assets/29f7011d-a42d-437c-8e60-04bb313e022e)
 
 ---
 

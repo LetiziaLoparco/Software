@@ -5,7 +5,8 @@ from Config import N_SIDE
 
 def occupation(j, N_qubits):
     """
-    Create the occupation operator |r><r| for each site j of the register, where the Rydberg state |r> represents the excited state.
+    Create the occupation operator |r><r| for each site j of the register,
+    where the Rydberg state |r> represents the excited state.
 
     Parameters
     ----------
@@ -18,7 +19,15 @@ def occupation(j, N_qubits):
     -------
     qutip.Qobj
         Occupation operator for the specified site.
+
+    Raises
+    ------
+    IndexError
+        If the index `j` is outside the valid range.
     """
+    if j < 0 or j >= N_qubits:
+        raise IndexError("Index out of range")
+    
     up = qutip.basis(2, 0) # creates a basis vector in the 2-dimensional Hilbert space, state index=0 it means |r> in this case.
     prod = [qutip.qeye(2) for _ in range(N_qubits)] # creates a list of 2x2 identity matrix (for N_qubits).
     prod[j] = up * up.dag() #forms a projector operator for |r> at the state j.
@@ -125,7 +134,6 @@ def get_full_corr_function(reg, final_state, R_interatomic):
     return correlation_function
 
 
-
 def prepare_correlation_matrix(correlation_function):
     """
     Prepare the correlation matrix for visualization.
@@ -139,11 +147,29 @@ def prepare_correlation_matrix(correlation_function):
     -------
     np.ndarray
         Normalized correlation matrix for visualization.
+
+    Raises
+    ------
+    ValueError
+        If the correlation_function is empty or has an incorrect size.
     """
+
+    # Check if the correlation function is empty or has an incorrect size
+    if not correlation_function:
+        raise ValueError("Correlation function is empty.")
+    
+    expected_size = (2 * N_SIDE - 1) ** 2
+    if len(correlation_function) != expected_size:
+        raise ValueError(
+            f"Expected {expected_size} entries, but got {len(correlation_function)}."
+        )
+
+    # Reshape and normalize the matrix
     A = 4 * np.reshape(
         list(correlation_function.values()), (2 * N_SIDE - 1, 2 * N_SIDE - 1)
     )
     return A / np.max(A)
+
 
 
 

@@ -1,8 +1,8 @@
 import numpy as np
 import qutip
+import pytest
 
 from pulser import Register
-from Config import N_SIDE
 
 
 from Utilities import occupation  
@@ -87,7 +87,7 @@ def test_occupation_invalid_index():
     """
     Test the `occupation` function with an invalid index (out of range).
 
-    If the index `j` is greater than or equal to the number of qubits or less than 0,
+    If the index `j` is greater than the number of qubits,
     the function is expected to raise an `IndexError`.
     """
     # Invalid index
@@ -95,13 +95,19 @@ def test_occupation_invalid_index():
     N_qubits = 5  # Total number of qubits
 
     # Assert that an IndexError is raised
-    try:
+    with pytest.raises(IndexError, match="Index out of range"):
         occupation(j, N_qubits)
-    except IndexError:
-        pass
-    else:
-        assert False, "Expected IndexError for invalid index."
 
+def test_occupation_raises_negative_index():
+    """
+    Test that the `occupation` function raises an IndexError for a negative index.
+    """
+    j = -1  # Negative index
+    N_qubits = 5
+
+    # Assert that an IndexError is raised
+    with pytest.raises(IndexError, match="Index out of range"):
+        occupation(j, N_qubits)
 
 def test_occupation_single_qubit():
     """
@@ -146,7 +152,7 @@ def test_get_corr_pairs_valid():
     result_pairs = get_corr_pairs(k, l, reg, R_interatomic)
 
     # Assert that the result matches the expected pairs
-    assert sorted(result_pairs) == sorted(expected_pairs), f"Expected {expected_pairs}, got {result_pairs}"
+    assert result_pairs == expected_pairs, f"Expected {expected_pairs}, got {result_pairs}"
 
 def test_get_corr_pairs_zero_displacement_vector(): 
     """
@@ -167,7 +173,7 @@ def test_get_corr_pairs_zero_displacement_vector():
     result_pairs = get_corr_pairs(k, l, reg, R_interatomic)
 
     # Assert that the result matches the expected pairs
-    assert sorted(result_pairs) == sorted(expected_pairs), f"Expected {expected_pairs}, got {result_pairs}"
+    assert result_pairs == expected_pairs, f"Expected {expected_pairs}, got {result_pairs}"
 
 
 def test_get_corr_pairs_diagonal_pairs(): 
@@ -180,6 +186,7 @@ def test_get_corr_pairs_diagonal_pairs():
 
     # Starting data
     R_interatomic = 2.0 
+    N_SIDE = 3
     reg = Register.square(N_SIDE, spacing=R_interatomic)  
     k, l = 1, 1  
 
@@ -224,6 +231,7 @@ def test_get_corr_pairs_multiple_displacements():
     """
     # Starting data
     R_interatomic = 1.0
+    N_SIDE = 3
     reg = Register.square(N_SIDE, spacing=R_interatomic)  
     displacements = [(1, 0), (0, 1), (1, 1)]  
 
@@ -237,7 +245,7 @@ def test_get_corr_pairs_multiple_displacements():
     for (k, l), expected_pairs in expected_results.items():
         # Calculated result for each displacement
         result_pairs = get_corr_pairs(k, l, reg, R_interatomic)
-        assert sorted(result_pairs) == sorted(expected_pairs), f"Displacement ({k}, {l}): Expected {expected_pairs}, got {result_pairs}"
+        assert result_pairs == expected_pairs, f"Displacement ({k}, {l}): Expected {expected_pairs}, got {result_pairs}"
 
 
 
@@ -254,7 +262,8 @@ def test_get_corr_function_entangled_states():
     superposition of two alternating spin configurations: |010101010> and |101010101>.
     """
     # Constants
-    R_interatomic = 1.0 
+    R_interatomic = 1.0
+    N_SIDE = 3 
     k, l = 1, 0  
     N = N_SIDE * N_SIDE
     # Create a square register of qubits
@@ -303,6 +312,7 @@ def test_get_corr_function_uncorrelated_qubits():
     """
     # Starting data
     R_interatomic = 1.0  
+    N_SIDE = 3
     reg = Register.square(N_SIDE, spacing=R_interatomic)  
     k, l = 1, 0  
 
@@ -341,6 +351,7 @@ def test_get_corr_function_uncorrelated_qubits_with_interaction():
 
     # Starting data
     R_interatomic = 1.0  
+    N_SIDE = 3
     reg = Register.square(N_SIDE, spacing=R_interatomic)  
     k, l = 1, 1  
 
@@ -374,7 +385,8 @@ def test_get_corr_function_self_correlation():
     and handles the trivial displacement vector case.
     """
     # Starting data
-    R_interatomic = 1.0  
+    R_interatomic = 1.0 
+    N_SIDE = 3 
     reg = Register.square(N_SIDE, spacing=R_interatomic) 
     k, l = 0, 0  
 
@@ -405,6 +417,7 @@ def test_prepare_correlation_matrix_valid():
     it correctly reshapes and normalizes the matrix.
     """
     # Starting data:
+    N_SIDE = 3
     correlation_function = {
         (-2, -2): 1,
         (-2, -1): 2,
@@ -461,34 +474,28 @@ def test_prepare_correlation_matrix_empty():
     # Starting data
     correlation_function = {}
 
-    # Call the function and handle empty input
-    try:
-        result_matrix = prepare_correlation_matrix(correlation_function)
-        assert result_matrix.size == 0, "Expected an empty matrix for empty input."
-    except ValueError:
-        pass  # If the function raises an error for empty input, that's acceptable.
+    # Assert that a ValueError is raised
+    with pytest.raises(ValueError, match="Correlation function is empty."):
+        prepare_correlation_matrix(correlation_function)
 
 
 def test_prepare_correlation_matrix_unbalanced():
     """
     Test the `prepare_correlation_matrix` function with unbalanced input.
 
-    The function is tested with a dictionary that has fewer or more entries than 
+    The function is tested with a dictionary that has fewer than 
     expected for the lattice size, ensuring proper handling of incorrect inputs.
     """
-    # Starting data: Missing or extra entries
+    # Starting data:
     correlation_function = {
         (-1, 0): 3,
         (0, 0): 4,
         (1, 0): 5  # Insufficient entries for (2 * N_SIDE - 1)^2
     }
 
-    # Call the function and handle incorrect input size
-    try:
+    # Assert that a ValueError is raised
+    with pytest.raises(ValueError, match="Expected .* entries, but got .*"):
         prepare_correlation_matrix(correlation_function)
-        assert False, "Expected an error for unbalanced input."
-    except ValueError:
-        pass  # Properly raises an error
 
 
 def test_prepare_correlation_matrix_normalization():
@@ -522,6 +529,7 @@ def test_neel_structure_factor_positive():
     """
     # Constants
     R_interatomic = 1.0
+    N_SIDE = 3
     reg = Register.square(N_SIDE, spacing=R_interatomic)
 
     # Test cases

@@ -30,9 +30,70 @@ def prepare_register(U):
 
 
 
+def run_single_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep):
+    """
+    Run a single quantum simulation for a given sweep time and calculate the final states and correlation values.
+
+    Parameters
+    ----------
+    reg : Register
+        Quantum register containing qubit positions.
+    R_interatomic : float
+        Interatomic distance scaling factor.
+    Omega_max : float
+        Maximum Rabi frequency for the pulse.
+    delta_0 : float
+        Initial detuning of the pulse.
+    delta_f : float
+        Final detuning of the pulse.
+    t_rise : float
+        Rise time of the pulse.
+    t_fall : float
+        Fall time of the pulse.
+    t_sweep : float
+        Sweep time to simulate.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - t_tot (float): Total duration of the sweep in microseconds.
+        - sim_results_states (QutipEmulator.Result): Simulation results containing quantum states.
+        - correlation_value (dict): Calculated correlation function values.
+    """
+    t_tot = (t_sweep + t_rise + t_fall) * 1e-3  # Convert to µs
+
+    # Define the pulses
+    rise = Pulse.ConstantDetuning(
+        RampWaveform(t_rise, 0.0, Omega_max), delta_0, 0.0
+    )
+    sweep = Pulse.ConstantAmplitude(
+        Omega_max, RampWaveform(t_sweep, delta_0, delta_f), 0.0
+    )
+    fall = Pulse.ConstantDetuning(
+        RampWaveform(t_fall, Omega_max, 0.0), delta_f, 0.0
+    )
+
+    # Create the sequence and run the simulation
+    seq = Sequence(reg, AnalogDevice)
+    seq.declare_channel("ising", "rydberg_global")
+    seq.add(rise, "ising")
+    seq.add(sweep, "ising")
+    seq.add(fall, "ising")
+
+    simul = QutipEmulator.from_sequence(seq, sampling_rate=0.02)
+    sim_results_states = simul.run(progress_bar=True)
+
+    # Calculate the correlation values and final states
+    sim_final_state = sim_results_states.states[-1]
+    correlation_value = get_full_corr_function(reg, sim_final_state, R_interatomic)
+
+    return t_tot, sim_results_states, correlation_value
+
+
 def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range):
     """
-    Run a quantum simulation for various time sweeps (hence total time) and calculate the correlation values.
+    Run a loop over multiple sweep times and aggregate the results of quantum simulations.
 
     Parameters
     ----------
@@ -61,36 +122,14 @@ def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fa
         - sim_results_states (QutipEmulator.Result): Simulation results containing quantum states.
         - correlation_value (dict): Calculated correlation function values.
     """
-   
     output_simulations = []
 
     for t_sweep in t_sweep_range:
-        t_tot = (t_sweep + t_rise + t_fall)*1e-3 # Convert to µs
-
-        rise = Pulse.ConstantDetuning(
-            RampWaveform(t_rise, 0.0, Omega_max), delta_0, 0.0
-        )
-        sweep = Pulse.ConstantAmplitude(
-            Omega_max, RampWaveform(t_sweep, delta_0, delta_f), 0.0
-        )
-        fall = Pulse.ConstantDetuning(
-            RampWaveform(t_fall, Omega_max, 0.0), delta_f, 0.0
-        )
-
-        seq = Sequence(reg, AnalogDevice)
-        seq.declare_channel("ising", "rydberg_global")
-        seq.add(rise, "ising")
-        seq.add(sweep, "ising")
-        seq.add(fall, "ising")
-        simul = QutipEmulator.from_sequence(seq, sampling_rate=0.02)
-
-        sim_results_states = simul.run(progress_bar=True)
-        sim_final_state = sim_results_states.states[-1]
-        correlation_value = get_full_corr_function(reg, sim_final_state, R_interatomic) 
-
-        output_simulations.append((t_tot, sim_results_states, correlation_value)) 
+        result = run_single_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep)
+        output_simulations.append(result)
 
     return output_simulations
+
 
 
 

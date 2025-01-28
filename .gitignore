@@ -3,3 +3,5 @@ prova/
 Commenti_code_mio.txt
 GitHub_tools.docx
 Prova_test.ipynb
+__pycache__/
+.pytest_cache/

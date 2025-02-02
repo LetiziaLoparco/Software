@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import random
 from pulser import Register
 from pulser.devices import AnalogDevice
 

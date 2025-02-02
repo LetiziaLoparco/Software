@@ -27,8 +27,8 @@ class GUIHandler(QMainWindow):
         self.ui.Plot.addWidget(self.canvas)  
 
         # Loading the configuration
-        self.config = load_config()
-        self.sync_gui_with_config()
+        self.config = load_config() # If exist configuration file, it will be loaded when the GUI is opened
+        self.sync_gui_with_config() # If the configuration file is not found, the default values will be used
 
 
 
@@ -44,7 +44,7 @@ class GUIHandler(QMainWindow):
         self.ui.Neel_structure_plot_button.clicked.connect(self.initialize_parameters)
         self.ui.Neel_structure_plot_button.clicked.connect(self.show_neel_structure)
         self.ui.Show_next_command.clicked.connect(self.show_next_correlation_plot)
-        self.ui.Config_button.clicked.connect(self.load_config_from_button)
+        self.ui.Config_button.clicked.connect(self.load_config_from_button) # If the user wants to load a configuration file, the button will be clicked
 
 
 

@@ -138,7 +138,8 @@ The software provides a user-friendly interface to visualize and analyze quantum
 ### Example GUI Interface
 Below is an example screenshot showing the GUI after generating the antiferromagnetic correlation plot by clicking the corresponding button.
 
-![GUInterface](https://github.com/user-attachments/assets/29f7011d-a42d-437c-8e60-04bb313e022e)
+![GUInterface](https://github.com/user-attachments/assets/06792010-1db1-4d57-a4ea-8bc3aa1fb45d)
+
 
 ---
 

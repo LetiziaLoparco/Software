@@ -26,7 +26,7 @@ def test_prepare_register():
     expected_num_qubits = N_SIDE ** 2  
 
     # Call the function
-    reg, R_interatomic = prepare_register(U)
+    reg, R_interatomic = prepare_register(U, N_SIDE)
 
     # Assertions
     assert R_interatomic == pytest.approx(expected_R_interatomic, abs =1.5), "R_interatomic is not calculated correctly."
@@ -57,7 +57,7 @@ def test_run_single_simulation():
 
     # Run the simulation
     t_tot, sim_results_states, correlation_value = run_single_simulation(
-        reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep
+        reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep, N_SIDE
     )
 
     # Assertions: Check outputs

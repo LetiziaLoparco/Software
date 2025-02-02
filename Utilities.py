@@ -1,7 +1,7 @@
 import numpy as np
 import qutip
 import matplotlib.pyplot as plt
-from Config import N_SIDE
+
 
 def occupation(j, N_qubits):
     """
@@ -68,7 +68,7 @@ def get_corr_pairs(k, l, register, R_interatomic):
 
 
 
-def get_corr_function(k, l, reg, R_interatomic, final_state):
+def get_corr_function(k, l, reg, R_interatomic, final_state, N_SIDE):
     """
     Calculate the covariance in order to calculate the correlation function for specific displacements.
 
@@ -84,6 +84,8 @@ def get_corr_function(k, l, reg, R_interatomic, final_state):
         Interatomic distance scaling factor.
     final_state : qutip.Qobj
         Final quantum state of the system.
+    N_SIDE : int
+        Number of qubits per side of the square register, defining a grid of (N_SIDE x N_SIDE) qubits.
 
     Returns
     -------
@@ -108,7 +110,7 @@ def get_corr_function(k, l, reg, R_interatomic, final_state):
 
 
 
-def get_full_corr_function(reg, final_state, R_interatomic):
+def get_full_corr_function(reg, final_state, R_interatomic, N_SIDE):
     """
     Calculate the full correlation function for all displacement vectors.
 
@@ -120,6 +122,8 @@ def get_full_corr_function(reg, final_state, R_interatomic):
         Final quantum state of the system.
     R_interatomic : float
         Interatomic distance scaling factor.
+    N_SIDE : int
+        Number of qubits per side of the square register, defining a grid of (N_SIDE x N_SIDE) qubits.
 
     Returns
     -------
@@ -130,11 +134,11 @@ def get_full_corr_function(reg, final_state, R_interatomic):
     
     for k in range(-N_SIDE + 1, N_SIDE):
         for l in range(-N_SIDE + 1, N_SIDE):
-            correlation_function[(k, l)] = get_corr_function(k, l, reg, R_interatomic, final_state)
+            correlation_function[(k, l)] = get_corr_function(k, l, reg, R_interatomic, final_state, N_SIDE)
     return correlation_function
 
 
-def prepare_correlation_matrix(correlation_function):
+def prepare_correlation_matrix(correlation_function, N_SIDE):
     """
     Prepare the correlation matrix for visualization.
 
@@ -142,6 +146,8 @@ def prepare_correlation_matrix(correlation_function):
     ----------
     correlation_function : dict
         Dictionary of correlation function values.
+    N_SIDE : int
+        Number of qubits per side of the square register, defining a grid of (N_SIDE x N_SIDE) qubits.
 
     Returns
     -------
@@ -173,7 +179,7 @@ def prepare_correlation_matrix(correlation_function):
 
 
 
-def create_figure_correlation_matrix(A, t_tot, ax = None):
+def create_figure_correlation_matrix(A, t_tot, N_SIDE, ax = None):
     """
     Plot the correlation matrix.
 
@@ -183,6 +189,8 @@ def create_figure_correlation_matrix(A, t_tot, ax = None):
         Correlation matrix.
     t_tot : float
         Total time of the pulse sequence.
+    N_SIDE : int
+        Number of qubits per side of the square register, defining a grid of (N_SIDE x N_SIDE) qubits.
     ax : matplotlib.axes.Axes, optional
         Axes object for embedding the plot. If None, a new plot is created.
 
@@ -216,7 +224,7 @@ def create_figure_correlation_matrix(A, t_tot, ax = None):
 
 
 
-def get_neel_structure_factor(reg, R_interatomic, state):
+def get_neel_structure_factor(reg, R_interatomic, state, N_SIDE):
     """
     Calculate the Néel structure factor for a quantum register.
 
@@ -228,6 +236,8 @@ def get_neel_structure_factor(reg, R_interatomic, state):
         Interatomic distance scaling factor.
     state : qutip.Qobj
         Final quantum state of the system.
+    N_SIDE : int
+        Number of qubits per side of the square register, defining a grid of (N_SIDE x N_SIDE) qubits.
 
     Returns
     -------
@@ -242,7 +252,7 @@ def get_neel_structure_factor(reg, R_interatomic, state):
             ll = np.abs(l)
             if not (k == 0 and l == 0):
                 st_fac += (
-                     (-1) ** (kk + ll) * get_corr_function(k, l, reg, R_interatomic, state)
+                     (-1) ** (kk + ll) * get_corr_function(k, l, reg, R_interatomic, state, N_SIDE)
                 )
     return 4 * st_fac
 

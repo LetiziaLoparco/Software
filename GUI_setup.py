@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'GUI_setup.ui'
+# Form implementation generated from reading ui file '.\GUI_setup.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -123,6 +123,9 @@ class Ui_MainWindow(object):
         self.Reg_seq_plot_button = QtWidgets.QPushButton(self.centralwidget)
         self.Reg_seq_plot_button.setGeometry(QtCore.QRect(670, 250, 191, 28))
         self.Reg_seq_plot_button.setObjectName("Reg_seq_plot_button")
+        self.Config_button = QtWidgets.QPushButton(self.centralwidget)
+        self.Config_button.setGeometry(QtCore.QRect(1032, 30, 161, 28))
+        self.Config_button.setObjectName("Config_button")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1217, 26))
@@ -147,11 +150,12 @@ class Ui_MainWindow(object):
         self.t_sweep_label.setText(_translate("MainWindow", "t sweep (ns):"))
         self.t_fall_label.setText(_translate("MainWindow", "t fall (ns):"))
         self.to_label.setText(_translate("MainWindow", "to"))
-        self.Correlation_plot_button.setText(_translate("MainWindow", "Show 2d antiferromagnet correlation"))
+        self.Correlation_plot_button.setText(_translate("MainWindow", "Show 2D antiferromagnetic correlation"))
         self.Neel_structure_plot_button.setText(_translate("MainWindow", "Show Néel structure factor depending on t"))
         self.Parameters_label_2.setText(_translate("MainWindow", "Show results:"))
         self.Show_next_command.setText(_translate("MainWindow", "Show next"))
         self.Reg_seq_plot_button.setText(_translate("MainWindow", "Show Register"))
+        self.Config_button.setText(_translate("MainWindow", "Select configuration file"))
 
 
 if __name__ == "__main__":

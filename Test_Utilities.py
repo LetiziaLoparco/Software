@@ -283,7 +283,7 @@ def test_get_corr_function_entangled_states():
 
 
     # Calculate the correlation function using the tested function
-    result = get_corr_function(k, l, reg, R_interatomic, final_state)
+    result = get_corr_function(k, l, reg, R_interatomic, final_state, N_SIDE)
 
     # Print debugging information
     print(f"Result: {result}, Expected: {expected_covariance}")
@@ -324,7 +324,7 @@ def test_get_corr_function_uncorrelated_qubits():
     expected_covariance = 0
 
     # Calculated result
-    result = get_corr_function(k, l, reg, R_interatomic, final_state)
+    result = get_corr_function(k, l, reg, R_interatomic, final_state, N_SIDE)
     
     
     # Assert equality
@@ -363,7 +363,7 @@ def test_get_corr_function_uncorrelated_qubits_with_interaction():
     expected_covariance = 0
 
     # Calculated result
-    result = get_corr_function(k, l, reg, R_interatomic, final_state)
+    result = get_corr_function(k, l, reg, R_interatomic, final_state, N_SIDE)
     
     
     # Assert equality
@@ -397,7 +397,7 @@ def test_get_corr_function_self_correlation():
    
 
     expected_covariance = 0
-    result = get_corr_function(k, l, reg, R_interatomic, final_state)
+    result = get_corr_function(k, l, reg, R_interatomic, final_state, N_SIDE)
     
     
     # Assert equality
@@ -456,7 +456,7 @@ def test_prepare_correlation_matrix_valid():
     ])
 
     # Call the function
-    result_matrix = prepare_correlation_matrix(correlation_function)
+    result_matrix = prepare_correlation_matrix(correlation_function, N_SIDE)
 
     # Assertions
     assert result_matrix.shape == (2 * N_SIDE - 1, 2 * N_SIDE - 1), \
@@ -472,11 +472,12 @@ def test_prepare_correlation_matrix_empty():
     The function is expected to return an empty matrix or raise a meaningful error.
     """
     # Starting data
+    N_SIDE = 3
     correlation_function = {}
 
     # Assert that a ValueError is raised
     with pytest.raises(ValueError, match="Correlation function is empty."):
-        prepare_correlation_matrix(correlation_function)
+        prepare_correlation_matrix(correlation_function, N_SIDE)
 
 
 def test_prepare_correlation_matrix_unbalanced():
@@ -487,6 +488,7 @@ def test_prepare_correlation_matrix_unbalanced():
     expected for the lattice size, ensuring proper handling of incorrect inputs.
     """
     # Starting data:
+    N_SIDE = 3
     correlation_function = {
         (-1, 0): 3,
         (0, 0): 4,
@@ -495,7 +497,7 @@ def test_prepare_correlation_matrix_unbalanced():
 
     # Assert that a ValueError is raised
     with pytest.raises(ValueError, match="Expected .* entries, but got .*"):
-        prepare_correlation_matrix(correlation_function)
+        prepare_correlation_matrix(correlation_function, N_SIDE)
 
 
 def test_prepare_correlation_matrix_normalization():
@@ -506,12 +508,13 @@ def test_prepare_correlation_matrix_normalization():
     the matrix is normalized to the range [0, 1].
     """
     # Starting data
+    N_SIDE = 3
     correlation_function = {
         (k, l): k * l for k in range(-2, 3) for l in range(-2, 3)
     }
 
     # Call the function
-    result_matrix = prepare_correlation_matrix(correlation_function)
+    result_matrix = prepare_correlation_matrix(correlation_function, N_SIDE)
 
     # Check normalization
     max_value = np.max(result_matrix)
@@ -552,6 +555,6 @@ def test_neel_structure_factor_positive():
 
     # Test each state
     for idx, state in enumerate(test_states):
-        result = get_neel_structure_factor(reg, R_interatomic, state)
+        result = get_neel_structure_factor(reg, R_interatomic, state, N_SIDE)
         
         assert result >= 0, f"Néel structure factor is negative for test case {idx + 1}."

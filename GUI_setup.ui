@@ -341,7 +341,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Show 2d antiferromagnet correlation</string>
+     <string>Show 2D antiferromagnetic correlation</string>
     </property>
    </widget>
    <widget class="QPushButton" name="Neel_structure_plot_button">
@@ -394,6 +394,19 @@
     </property>
     <property name="text">
      <string>Show Register</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Config_button">
+    <property name="geometry">
+     <rect>
+      <x>1032</x>
+      <y>30</y>
+      <width>161</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Select configuration file</string>
     </property>
    </widget>
   </widget>

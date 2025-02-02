@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from GUI_setup import Ui_MainWindow
@@ -7,10 +7,10 @@ from Functions import prepare_register
 from Functions import run_simulation
 from Functions import prepare_and_show_first_figure_correlation_matrix
 from Functions import prepare_and_show_Neel_structure_factor
+from Functions import load_config
+from Functions import save_config
 from Utilities import create_figure_correlation_matrix
-from Config import *
-
-
+from SharedVariables import IMAGE_MATRIX_LIST, IMAGE_MATRIX_LIST_INDEX
 
 
 
@@ -26,12 +26,16 @@ class GUIHandler(QMainWindow):
         self.canvas = FigureCanvas(self.figure) 
         self.ui.Plot.addWidget(self.canvas)  
 
+        # Loading the configuration
+        self.config = load_config()
+        self.sync_gui_with_config()
 
 
     def setup_connections(self):
         """
         Set up connections between UI buttons and their respective handler functions.
         """
+
         self.ui.Reg_seq_plot_button.clicked.connect(self.initialize_parameters)
         self.ui.Reg_seq_plot_button.clicked.connect(self.show_register_sequence)
         self.ui.Correlation_plot_button.clicked.connect(self.initialize_parameters)
@@ -39,6 +43,32 @@ class GUIHandler(QMainWindow):
         self.ui.Neel_structure_plot_button.clicked.connect(self.initialize_parameters)
         self.ui.Neel_structure_plot_button.clicked.connect(self.show_neel_structure)
         self.ui.Show_next_command.clicked.connect(self.show_next_correlation_plot)
+        self.ui.Config_button.clicked.connect(self.load_config_from_button)
+
+
+    def sync_gui_with_config(self):
+        """
+        Sync the values in the GUI with the current configuration.
+        """
+        self.N_SIDE = self.config["N_SIDE"] 
+        self.NUMBER_STEPS = self.config["NUMBER_STEPS"] 
+        save_config(self.config)  # Save after loading
+
+    def load_config_from_button(self):
+        """
+        Open a file dialog to load a configuration file and sync the GUI.
+        """
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Select Configuration File", "", "JSON Files (*.json);;All Files (*)", options=options
+        )
+        if file_path:
+            try:
+                self.config = load_config(file_path)
+                self.sync_gui_with_config()
+                print(f"Configuration loaded successfully from {file_path}")
+            except Exception as e:
+                print(f"Error loading configuration: {e}")
 
 
 
@@ -53,7 +83,7 @@ class GUIHandler(QMainWindow):
         -------
         tuple
             Initialized parameters including interaction strength, pulse settings,
-            and time sweep values.
+            time sweep values and Number of atoms per side.
         """
 
         self.U = self.ui.U_h_value.value() * 2 * np.pi
@@ -62,9 +92,9 @@ class GUIHandler(QMainWindow):
         self.delta_f = self.ui.Delta_final_value.value() * 2 * np.pi
         self.t_rise = self.ui.t_rise_value.value()
         self.t_fall = self.ui.t_fall_value.value()
-        self.t_sweep_values = np.arange(self.ui.t_sweep_value_1.value(), self.ui.t_sweep_value_2.value(), NUMBER_STEPS)
+        self.t_sweep_values = np.arange(self.ui.t_sweep_value_1.value(), self.ui.t_sweep_value_2.value(),  self.NUMBER_STEPS)
         self.t_sweep_values = np.ceil(self.t_sweep_values / 4) * 4  # Ensure values are multiples of 4
-        return self.U, self.Omega_max, self.delta_0, self.delta_f, self.t_rise, self.t_fall, self.t_sweep_values
+        return self.U, self.Omega_max, self.delta_0, self.delta_f, self.t_rise, self.t_fall, self.t_sweep_values, self.N_SIDE
 
 
 
@@ -74,8 +104,8 @@ class GUIHandler(QMainWindow):
 
         Uses the `prepare_register` function to generate the register and draw its configuration.
         """
-        U, _, _, _, _, _, _ = self.initialize_parameters()
-        reg, _ = prepare_register(U)
+        U, _, _, _, _, _, _, N_SIDE= self.initialize_parameters()
+        reg, _ = prepare_register(U, N_SIDE)
         reg.draw()  
 
 
@@ -93,14 +123,14 @@ class GUIHandler(QMainWindow):
         # This handles the global variable management for navigation between plots.
 
         # Simulation 
-        U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range =self.initialize_parameters()
-        reg, R_interatomic = prepare_register(U)
-        results_sim = run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range)
+        U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range, N_SIDE  =self.initialize_parameters()
+        reg, R_interatomic = prepare_register(U, N_SIDE)
+        results_sim = run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range, N_SIDE)
 
         # Plot figure
         self.figure.clear()
         ax = self.figure.add_subplot(111)  
-        prepare_and_show_first_figure_correlation_matrix(results_sim, ax=ax)  
+        prepare_and_show_first_figure_correlation_matrix(results_sim, N_SIDE, ax=ax)  
         self.canvas.draw()  
 
 
@@ -113,12 +143,13 @@ class GUIHandler(QMainWindow):
         """
         global IMAGE_MATRIX_LIST_INDEX
         IMAGE_MATRIX_LIST_INDEX += 1
-        
+        N_SIDE = self.N_SIDE
+
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         if IMAGE_MATRIX_LIST_INDEX < len(IMAGE_MATRIX_LIST):
 
-            create_figure_correlation_matrix(IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][0], IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][1], ax = ax)
+            create_figure_correlation_matrix(IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][0], IMAGE_MATRIX_LIST[IMAGE_MATRIX_LIST_INDEX][1], N_SIDE, ax = ax)
             self.canvas.draw() 
         else:
             # Reset the index if no more plots are available
@@ -137,14 +168,14 @@ class GUIHandler(QMainWindow):
         Runs the simulation, calculates the Néel structure factor, and displays it in the GUI.
         """
         # Simulation
-        U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range =self.initialize_parameters()
-        reg, R_interatomic = prepare_register(U)
-        results_sim = run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range)
+        U, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range, N_SIDE =self.initialize_parameters()
+        reg, R_interatomic = prepare_register(U, N_SIDE)
+        results_sim = run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range, N_SIDE)
 
         # Plot figure
         self.figure.clear()
         ax = self.figure.add_subplot(111)  
-        prepare_and_show_Neel_structure_factor(reg, R_interatomic, results_sim, ax=ax)    
+        prepare_and_show_Neel_structure_factor(reg, R_interatomic, results_sim, N_SIDE, ax=ax)    
         self.canvas.draw() 
 
 

@@ -154,7 +154,7 @@ The **GUI interface** allows you to select a `.json` file via the **"Select Conf
   Use **"Show Next"** to cycle through different time-sweep plots.
 
 - **Reset and Re-run Simulations**  
-  Modify parameters or restart simulations using the **reset option**.
+  Reset parameters or re-run simulations as needed.
 
 
 ### Example GUI Interface

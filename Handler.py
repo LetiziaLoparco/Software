@@ -31,6 +31,7 @@ class GUIHandler(QMainWindow):
         self.sync_gui_with_config()
 
 
+
     def setup_connections(self):
         """
         Set up connections between UI buttons and their respective handler functions.
@@ -46,6 +47,7 @@ class GUIHandler(QMainWindow):
         self.ui.Config_button.clicked.connect(self.load_config_from_button)
 
 
+
     def sync_gui_with_config(self):
         """
         Sync the values in the GUI with the current configuration.
@@ -53,6 +55,8 @@ class GUIHandler(QMainWindow):
         self.N_SIDE = self.config["N_SIDE"] 
         self.NUMBER_STEPS = self.config["NUMBER_STEPS"] 
         save_config(self.config)  # Save after loading
+
+
 
     def load_config_from_button(self):
         """

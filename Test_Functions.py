@@ -1,13 +1,13 @@
 import pytest
 import numpy as np
-import qutip
+import random
 from pulser import Register
 from pulser.devices import AnalogDevice
 
 
 from Functions import prepare_register 
 from Functions import run_single_simulation  
-from Functions import get_corr_function
+
 
 
 def test_prepare_register():
@@ -35,14 +35,12 @@ def test_prepare_register():
 ####################################################################################################
 
 
-def test_run_single_simulation():
+def test_run_single_simulation_output_properties():
     """
-    Test the `run_single_simulation` function with fixed inputs and a random seed.
+    Test the `run_single_simulation` function with fixed inputs .
 
     Ensures reproducible results and checks output properties.
     """
-    # Set random seed for reproducibility
-    np.random.seed(42)
 
     # Define minimal test inputs
     R_interatomic = 6.0
@@ -60,7 +58,7 @@ def test_run_single_simulation():
         reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep, N_SIDE
     )
 
-    # Assertions: Check outputs
+    # Check total time
     expected_t_tot = (t_sweep + t_rise + t_fall) * 1e-3  # Convert to µs
     assert t_tot == pytest.approx(expected_t_tot, rel=1e-3), "Total time is incorrect."
 
@@ -73,55 +71,101 @@ def test_run_single_simulation():
     assert len(correlation_value) > 0, "Correlation values should not be empty."
 
 
-"""
-def test_run_single_simulation_ground_state():
-    
-    #Test that for a low sweep time (e.g., t_sweep = 50 µs), 
-    #most qubits remain in the ground state (approximately 70% or more).
-    
 
-    np.random.seed(42)
+def test_run_single_simulation_staggered_profile():
+    """
+    Test if the final state has at least 60% probability of being in '101010101'
+    when measured 1000 times.
 
+    Since the sweep time (t_sweep) is long (1000.0 ns), the system has enough time to evolve 
+    towards the target state. The expected final state, '101010101', represents a staggered 
+    profile, which indicates strong antiferromagnetic correlations.
+
+    A high probability of measuring this state confirms that the system successfully 
+    forms an antiferromagnetic order, as desired.
+    
+    This test ensures that the quantum register exhibits the correct staggered ordering 
+    after a sufficiently long evolution.
+    """
+    # Define simulation parameters
+    U = 2.7*2*np.pi  
     N_SIDE = 3
-    U = 2.7 * 2 * np.pi  # MHz
-    reg, R_interatomic = prepare_register(U)   
-    Omega_max = 2 * np.pi * 1.8  # MHz
-    delta_0 = -6.0  
-    delta_f = 4.5  
-    t_rise = 250.0
+    R_interatomic = AnalogDevice.rydberg_blockade_radius(U) 
+    reg = Register.square(N_SIDE, R_interatomic, prefix="q") 
+    Omega_max = 1.8 *2 * np.pi 
+    delta_0 = -6.0 *2 * np.pi 
+    delta_f = 4.5 *2 * np.pi 
+    t_rise = 250.0  
     t_fall = 250.0  
-    t_sweep = 520.0  
+    t_sweep = 1000.0  
 
     # Run the simulation
-    t_tot, sim_results_states, correlation_value = run_single_simulation(
-        reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep
+    _, sim_results_states, _ = run_single_simulation(
+        reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep, N_SIDE
     )
 
-    # Final state from the simulation
-    final_state = sim_results_states.states[-1]
+    # Sample final state 1000 times
+    num_samples = 1000
+    counts = sim_results_states.sample_final_state(N_samples=num_samples)
 
-    # Multi-qubit operators for each qubit
-    num_qubits = len(reg.qubits)
-    operators = [
-        qutip.tensor(
-            [qutip.qeye(2) if j != i else qutip.basis(2, 0) * qutip.basis(2, 0).dag()
-             for j in range(num_qubits)]
-        )
-        for i in range(num_qubits)
-    ]
+    # Define the target state
+    target_state = "101010101"
 
-    # Calculate the expectation values for the ground state
-    ground_state_expectations = [
-        qutip.expect(operators[i], final_state) for i in range(num_qubits)
-    ]
+    # Count occurrences of the target state
+    target_count = counts.get(target_state, 0)
+    percentage = (target_count / num_samples) * 100  # Convert to percentage
 
-    # Count qubits in the ground state (expectation > 0.7)
-    qubits_in_ground_state = sum(1 for exp in ground_state_expectations if exp > 0.7)
+    # Check if at least 60% of the samples are in the target state
+    assert percentage >= 60, f"Test failed! Probability of '{target_state}' is only {percentage:.2f}%"
 
-    # Assert that at least 70% of qubits are in the ground state
-    assert qubits_in_ground_state >= 0.7 * num_qubits, (
-        f"Expected at least 70% of qubits in the ground state, "
-        f"but got {qubits_in_ground_state / num_qubits * 100:.1f}%"
+
+
+def test_run_single_simulation_ground_state():
+    """
+    Test if the final state has at least 60% probability of NOT being in '101010101'
+    when measured 1000 times.
+
+    Since the sweep time (t_sweep) is short (100.0 ns), the system does not have enough 
+    time to fully evolve into the Rydberg state. Instead, the final state should remain 
+    close to the ground state, meaning that the antiferromagnetic ordering ('101010101') 
+    should appear infrequently.
+
+    This test ensures that, with a small evolution time, the atoms remain mostly 
+    in their initial ground state, validating the expected slow dynamical evolution 
+    of the system.
+    """
+    # Define simulation parameters
+    U = 2.7 * 2 * np.pi  
+    N_SIDE = 3  
+    R_interatomic = AnalogDevice.rydberg_blockade_radius(U)  
+    reg = Register.square(N_SIDE, R_interatomic, prefix="q")  
+    Omega_max = 1.8 * 2 * np.pi  
+    delta_0 = -6.0 * 2 * np.pi  
+    delta_f = 4.5 * 2 * np.pi  
+    t_rise = 250.0  
+    t_fall = 250.0  
+    t_sweep = 100.0  
+
+    # Run the simulation
+    _, sim_results_states, _ = run_single_simulation(
+        reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep, N_SIDE
     )
 
-"""
+    # Sample final state 1000 times
+    num_samples = 1000
+    counts = sim_results_states.sample_final_state(N_samples=num_samples)
+
+    # Define state (that should NOT appear frequently)
+    rydberg_target_state = "101010101"  
+
+    # Count occurrences
+    rydberg_count = counts.get(rydberg_target_state, 0)
+    rydberg_percentage = (rydberg_count / num_samples) * 100  # Probability of '101010101'
+    non_rydberg_percentage = 100 - rydberg_percentage  # Probability of NOT being '101010101'
+
+    # Ensure that at least 60% of the states are NOT in "101010101"
+    assert non_rydberg_percentage >= 60, (
+        f"Test failed! Only {non_rydberg_percentage:.2f}% of samples are NOT in '{rydberg_target_state}'"
+    )
+
+

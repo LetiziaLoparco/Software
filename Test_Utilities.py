@@ -37,6 +37,7 @@ def test_occupation_valid_index():
     assert result == expected_operator, "Occupation operator does not match the expected structure."
 
 
+
 def test_occupation_first_site():
     """
     Test the `occupation` function for the first site in the quantum register.
@@ -57,6 +58,7 @@ def test_occupation_first_site():
 
     # Assert equality
     assert result == expected_operator, "Occupation operator is incorrect for the first site."
+
 
 
 def test_occupation_last_site():
@@ -83,6 +85,7 @@ def test_occupation_last_site():
     assert result == expected_operator, "Occupation operator is incorrect for the last site."
 
 
+
 def test_occupation_invalid_index():
     """
     Test the `occupation` function with an invalid index (out of range).
@@ -98,6 +101,8 @@ def test_occupation_invalid_index():
     with pytest.raises(IndexError, match="Index out of range"):
         occupation(j, N_qubits)
 
+
+
 def test_occupation_raises_negative_index():
     """
     Test that the `occupation` function raises an IndexError for a negative index.
@@ -108,6 +113,8 @@ def test_occupation_raises_negative_index():
     # Assert that an IndexError is raised
     with pytest.raises(IndexError, match="Index out of range"):
         occupation(j, N_qubits)
+
+
 
 def test_occupation_single_qubit():
     """
@@ -154,6 +161,8 @@ def test_get_corr_pairs_valid():
     # Assert that the result matches the expected pairs
     assert result_pairs == expected_pairs, f"Expected {expected_pairs}, got {result_pairs}"
 
+
+
 def test_get_corr_pairs_zero_displacement_vector(): 
     """
     Test the `get_corr_pairs` function with valid inputs and expected pairs.
@@ -174,6 +183,7 @@ def test_get_corr_pairs_zero_displacement_vector():
 
     # Assert that the result matches the expected pairs
     assert result_pairs == expected_pairs, f"Expected {expected_pairs}, got {result_pairs}"
+
 
 
 def test_get_corr_pairs_diagonal_pairs(): 
@@ -200,6 +210,7 @@ def test_get_corr_pairs_diagonal_pairs():
     assert result_pairs == expected_pairs, f"Expected no pairs, got {result_pairs}"
 
 
+
 def test_get_corr_pairs_single_qubit():
     """
     Test the `get_corr_pairs` function with a single-qubit register.
@@ -220,6 +231,7 @@ def test_get_corr_pairs_single_qubit():
 
     # Assert that the result is an empty list
     assert result_pairs == expected_pairs, f"Expected no pairs, got {result_pairs}"
+
 
 
 def test_get_corr_pairs_multiple_displacements():
@@ -246,7 +258,6 @@ def test_get_corr_pairs_multiple_displacements():
         # Calculated result for each displacement
         result_pairs = get_corr_pairs(k, l, reg, R_interatomic)
         assert result_pairs == expected_pairs, f"Displacement ({k}, {l}): Expected {expected_pairs}, got {result_pairs}"
-
 
 
 
@@ -294,6 +305,7 @@ def test_get_corr_function_entangled_states():
     )
 
 
+
 def test_get_corr_function_uncorrelated_qubits():
     """
     Test the `get_corr_function` for a quantum register with an uncorrelated state.
@@ -329,6 +341,8 @@ def test_get_corr_function_uncorrelated_qubits():
     
     # Assert equality
     assert np.isclose(result, expected_covariance), f"Expected {expected_covariance}, got {result}"
+
+
 
 def test_get_corr_function_uncorrelated_qubits_with_interaction():
     """
@@ -368,6 +382,8 @@ def test_get_corr_function_uncorrelated_qubits_with_interaction():
     
     # Assert equality
     assert np.isclose(result, expected_covariance), f"Expected {expected_covariance}, got {result}"
+
+
 
 def test_get_corr_function_self_correlation():
     """
@@ -465,6 +481,7 @@ def test_prepare_correlation_matrix_valid():
         f"Expected matrix:\n{expected_matrix}\nGot:\n{result_matrix}"
 
 
+
 def test_prepare_correlation_matrix_empty():
     """
     Test the `prepare_correlation_matrix` function with an empty correlation function.
@@ -478,6 +495,7 @@ def test_prepare_correlation_matrix_empty():
     # Assert that a ValueError is raised
     with pytest.raises(ValueError, match="Correlation function is empty."):
         prepare_correlation_matrix(correlation_function, N_SIDE)
+
 
 
 def test_prepare_correlation_matrix_unbalanced():
@@ -498,6 +516,7 @@ def test_prepare_correlation_matrix_unbalanced():
     # Assert that a ValueError is raised
     with pytest.raises(ValueError, match="Expected .* entries, but got .*"):
         prepare_correlation_matrix(correlation_function, N_SIDE)
+
 
 
 def test_prepare_correlation_matrix_normalization():

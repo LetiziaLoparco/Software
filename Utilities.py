@@ -138,6 +138,7 @@ def get_full_corr_function(reg, final_state, R_interatomic, N_SIDE):
     return correlation_function
 
 
+
 def prepare_correlation_matrix(correlation_function, N_SIDE):
     """
     Prepare the correlation matrix for visualization.
@@ -175,7 +176,6 @@ def prepare_correlation_matrix(correlation_function, N_SIDE):
         list(correlation_function.values()), (2 * N_SIDE - 1, 2 * N_SIDE - 1)
     )
     return A / np.max(A)
-
 
 
 

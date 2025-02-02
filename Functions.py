@@ -8,15 +8,66 @@ from Utilities import *
 from SharedVariables import IMAGE_MATRIX_LIST, IMAGE_MATRIX_LIST_INDEX
 
 
-# For loading the configuration
 def load_config(config_path="config.json"):
+    """
+    Load configuration settings from a JSON file.
+
+    This function reads the specified JSON configuration file and returns its contents as a dictionary.
+    If no file path is provided, it defaults to "config.json".
+
+    Parameters
+    ----------
+    config_path : str, optional
+        Path to the configuration file (default is "config.json").
+
+    Returns
+    -------
+    dict
+        A dictionary containing the configuration parameters read from the JSON file.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified configuration file does not exist.
+    json.JSONDecodeError
+        If the file is not a valid JSON format.
+
+    """
     with open(config_path, 'r') as file:
         return json.load(file)
 
-# For saving the configuration
+
+
 def save_config(config, config_path="config.json"):
+    """
+    Save configuration settings to a JSON file.
+
+    This function writes the given configuration dictionary to a JSON file, formatting it for readability.
+    If no file path is specified, it defaults to "config.json".
+
+    Parameters
+    ----------
+    config : dict
+        A dictionary containing configuration parameters to be saved.
+    config_path : str, optional
+        Path to the configuration file (default is "config.json").
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    TypeError
+        If `config` is not a dictionary.
+    IOError
+        If an error occurs while writing to the file.
+
+    """
     with open(config_path, 'w') as file:
         json.dump(config, file, indent=4)
+
+
 
 def prepare_register(U, N_SIDE):
     """
@@ -106,6 +157,7 @@ def run_single_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_ris
     return t_tot, sim_results_states, correlation_value
 
 
+
 def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fall, t_sweep_range, N_SIDE):
     """
     Run a loop over multiple sweep times and aggregate the results of quantum simulations.
@@ -145,7 +197,6 @@ def run_simulation(reg, R_interatomic, Omega_max, delta_0, delta_f, t_rise, t_fa
         output_simulations.append(result)
 
     return output_simulations
-
 
 
 

@@ -63,7 +63,7 @@ This software offers an intuitive graphical user interface (GUI) for simulating 
 
 This code and theory summary are based on the Quantum Computing course by Prof. Calarco, Prof. Ercolessi, and Prof. Bonacorsi at the University of Bologna. The code is inspired by a model experimentally implemented with a Rydberg-atom platform ([DOI: 10.1103/PhysRevX.8.021070]). It leverages Pulser, an open-source Python library for programming neutral atom devices at the pulse level ([arXiv:2104.15044v3]).
 
-We aim to study a quantum many-body system, dynamically tuning the parameters to observe the buildup of antiferromagnetic order. The simulation emulates an Ising quantum antiferromagnet on a square lattice (pre-set to $$N_{side}=3$$ in `Config.py`), exploring the ground-state phase diagrams for the nearest-neighbor Ising model.
+We aim to study a quantum many-body system, dynamically tuning the parameters to observe the buildup of antiferromagnetic order. The simulation emulates an Ising quantum antiferromagnet on a square lattice (pre-set to $$N_{side}=3$$ in `Config.json`), exploring the ground-state phase diagrams for the nearest-neighbor Ising model.
 
 The GUI enables the observation of the influence of finite ramp speed on the extent of correlations, depending on the chosen parameters. The development of correlations during the ramp is visualized in both space and time.
 
@@ -85,7 +85,7 @@ Simulation parameters can be configured through the GUI. Default values are pre-
 - Maximum Rabi frequency $$\( \Omega \)$$
 - Initial and final detuning $$\( \Delta \)$$
 - Rise and fall times
-- Time sweep ranges (number of steps is pre-set to 100 in `Config.py`).
+- Time sweep ranges (number of steps is pre-set to 100 in `Config.json`).
 
 ##### Note:
 All limitations on pulse parameters can be found by printing the specifications from the Pulser library. Use the following command:
@@ -98,7 +98,7 @@ AnalogDevice.print_specs()
 
 #### 2. Quantum Register Preparation
 
-The register is set up as a square lattice of $$\( N_{\text{side}} \times N_{\text{side}} \)$$ atoms, where $$\( N_{\text{side}} \)$$ is defined in `Config.py` ( default: $$\( N_{\text{side}} = 3 \)$$ ).
+The register is set up as a square lattice of $$\( N_{\text{side}} \times N_{\text{side}} \)$$ atoms, where $$\( N_{\text{side}} \)$$ is defined in `Config.json` ( default: $$\( N_{\text{side}} = 3 \)$$ ).
 
 The interatomic distance (lattice spacing) is set equal to the Rydberg blockade radius, computed using Pulser’s `AnalogDevice.rydberg_blockade_radius(U)` function. The register is visualized using `reg.draw()`.
 
@@ -122,18 +122,40 @@ In the AF region of the phase diagram, stronger correlations yield higher values
 
 ---
 
-## How to Navigate the Software
+## **How to Navigate the Software**
 
-The software provides a user-friendly interface to visualize and analyze quantum systems. Follow these instructions to utilize its features effectively:
+The software provides a **user-friendly interface** to visualize and analyze quantum systems. Follow these instructions to effectively utilize its features.
 
-### Main Features
-- **Visualize the Quantum Register**: Click the **"Show Register"** button to view the quantum register configuration.
-- **Correlation Plot**: Generate and display the correlation matrix for the first time sweep by pressing the **"Show 2d antiferromagnetic correlation"** button.
-- **Néel Structure Plot**: Compute and display the Néel structure factor by selecting the **"Show Néel Structure factor depending on t"** button.
 
-### Additional Options
-- **Navigate Time-Sweep Plots**: Use the **"Show next"** button to cycle through time-sweep plots.
-- **Reset and Re-run**: Modify parameters or restart simulations using the reset option.
+### **Before Starting**
+The **GUI interface** allows you to select a `.json` file via the **"Select Configuration File"** option. This file defines:
+- **`N_SIDE`**: The number of atoms per side in a square lattice.
+- **`NUMBER_STEPS`**: The step size for the `t_sweep` range.
+
+**If no file is provided, default values will be used:**  
+- `N_SIDE = 3`  
+- `NUMBER_STEPS = 100`
+
+
+### **Main Features**
+- **Visualize the Quantum Register**  
+  Click **"Show Register"** to view the quantum register configuration.
+  
+- **Correlation Plot**  
+  Generate and display the **correlation matrix** for the first time sweep by clicking **"Show 2D Antiferromagnetic Correlation"**.
+  
+- **Néel Structure Plot**  
+  Compute and display the **Néel structure factor** over time by selecting **"Show Néel Structure Factor Depending on t"**.
+
+
+
+### **Additional Options**
+- **Navigate Time-Sweep Plots**  
+  Use **"Show Next"** to cycle through different time-sweep plots.
+
+- **Reset and Re-run Simulations**  
+  Modify parameters or restart simulations using the **reset option**.
+
 
 ### Example GUI Interface
 Below is an example screenshot showing the GUI after generating the antiferromagnetic correlation plot by clicking the corresponding button.
@@ -143,20 +165,28 @@ Below is an example screenshot showing the GUI after generating the antiferromag
 
 ---
 
-## Technical Details
+## **Technical Details**
 
-- **Dependencies**:
-  - Python libraries: `numpy`, `matplotlib`, `PyQt5`, `pulser`, `qutip`
+### **Dependencies**
+The software requires the following Python libraries:
+- `numpy`
+- `matplotlib`
+- `PyQt5`
+- `pulser`
+- `qutip`
 
-- **Core Modules**:
-  - `Main.py`: Core entry point to the software.
-  - `Handler.py`: Manages connections between the GUI layout and functionalities.
-  - `Functions.py`: Contains core simulation functions.
-  - `Utilities.py`: Includes helper functions for plotting and computation.
-  - `GUI_setup.py`: Handles GUI layout and design.
-  - `GUI_setup.ui`: GUI layout in `.ui` format.
-  - `Config.py`: Contains global settings, including the number of atoms per side and the number of steps for the time sweep.
-  - `Test_Utilities.py`: Contains test functions.
+### **Core Modules**
+- **`Main.py`**: The main entry point of the software.
+- **`Handler.py`**: Manages the connections between the GUI layout and core functionalities.
+- **`Functions.py`**: Contains the core simulation functions.
+- **`Utilities.py`**: Provides helper functions for plotting and computation.
+- **`GUI_setup.py`**: Defines and manages the **PyQt5-based** GUI layout.
+- **`GUI_setup.ui`**: The GUI layout file in `.ui` format.
+- **`Config.json`**: Stores configuration settings, including the number of atoms per side (`N_SIDE`) and the step size for the time sweep (`NUMBER_STEPS`).
+- **`SharedVariables.py`**: Contains global variables and acts as a bridge between different Python modules.
+- **`Test_Utilities.py`**: Includes utility functions for testing.
+- **`Test_Functions.py`**: Contains specific test cases for validating core functionalities.
+
 
 ---
 

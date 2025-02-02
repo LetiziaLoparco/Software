@@ -52,8 +52,8 @@ class GUIHandler(QMainWindow):
         """
         Sync the values in the GUI with the current configuration.
         """
-        self.N_SIDE = self.config["N_SIDE"] 
-        self.NUMBER_STEPS = self.config["NUMBER_STEPS"] 
+        self.N_SIDE = self.config.get("N_SIDE", 3)  # Default to 3 if missing
+        self.NUMBER_STEPS = self.config.get("NUMBER_STEPS", 100)  # Default to 100 if missing
         save_config(self.config)  # Save after loading
 
 
